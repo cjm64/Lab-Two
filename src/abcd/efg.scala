@@ -1,0 +1,5 @@
+package abcd
+
+object efg {
+
+}
