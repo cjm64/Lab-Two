@@ -1,3 +1,4 @@
 //comment
 object file {
+
 }
