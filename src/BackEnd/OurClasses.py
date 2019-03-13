@@ -12,8 +12,14 @@ print(p1.age)
 """
 
 
+class theWorld:
+    boundaryX = None
+    boundaryY = None
+
+
 class thing:
 
+    name = ""
     sizeX = None
     sizeY = None
 
