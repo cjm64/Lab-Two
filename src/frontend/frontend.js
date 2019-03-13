@@ -24,7 +24,7 @@ var config = {
             moveKeys: null,
             playerBullets: null,
             enemyBullets: null,
-            time: 0,
+            time: 0
         }
     }
 };
@@ -191,6 +191,10 @@ function enemyHitCallback(enemyHit, bulletHit)
                 board2.setText("Enemy: " + deaths)
                 board1.setText("Player: " + kills)
             }
+            if (deaths > kills){
+                board1.setText("Enemy: " + deaths)
+                board2.setText("Player: " + kills)
+            }
         }
 
         // Destroy bullet
@@ -217,6 +221,10 @@ function playerHitCallback(playerHit, bulletHit)
             if (deaths > kills){
                 board1.setText("Enemy: " + deaths)
                 board2.setText("Player: " + kills)
+            }
+            if (kills > deaths){
+                board2.setText("Enemy: " + deaths)
+                board1.setText("Player: " + kills)
             }
 
         }
