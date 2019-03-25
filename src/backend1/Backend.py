@@ -1,4 +1,7 @@
 import random
+import datetime
+import time
+import BackEnd.JakesFunctions
 #p1 = {"name": "", "kills": 0, "deaths": 0}
 #lst = [{"name": "", "kills": 0, "deaths": 0}, {"name": "", "kills": 0, "deaths": 0}]
 
@@ -34,7 +37,17 @@ def spawnLocation():
     return loc
 
 
+def immunity():
+    dt: float = time.time()
+    newTime = dt + 3
+    while dt >= newTime:
+        if BackEnd.JakesFunctions.hitDetection() == True:
+            BackEnd.JakesFunctions.hitDetection() == False
+    return dt
+
+
 if __name__ == '__main__':
     print(spawnLocation())
     print(elimination(True, {"name": "", "kills": 0, "deaths": 0}, {"name": "", "kills": 0, "deaths": 0}))
     print(scoreBoard([{"name": "player1", "kills": 1, "deaths": 0}, {"name": "player2", "kills": 2, "deaths": 0}]))
+    print(immunity())
