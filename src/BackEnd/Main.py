@@ -6,7 +6,7 @@ import time
 breakLoop = False
 currentTime = 0.0
 
-
+# code in this block will execute every 0.1 seconds (not including runtime)
 while True:
 
     if breakLoop:
