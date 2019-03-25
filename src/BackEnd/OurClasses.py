@@ -25,7 +25,7 @@ class thing:
     sizeX = None
     sizeY = None
 
-    direction = None # 1 or -1
+    # direction = None # 1 or -1
 
     # we can add like an image reference here too like: image = "anImage.png"
 
