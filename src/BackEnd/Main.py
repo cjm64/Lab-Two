@@ -9,9 +9,14 @@ currentTime = 0.0
 conn = sqlite3.connect('data.db')
 cur = conn.cursor()
 cur.execute('CREATE TABLE IF NOT EXISTS players (playerName, sizeX, sizeY, x, y)')
+
+cur.execute('CREATE TABLE IF NOT EXISTS projectiles (projectileID, sizeX, sizeY, x, y)')
+
 cur.execute('INSERT INTO players VALUES ("Jerry", 20, 20, 54, 36)')
 
-#
+cur.execute('INSERT INTO projectiles VALUES ("993", 10, 10, 49, 230)')
+
+# players and projectiles are stored in separate tables
 
 # we still need a function that basically determines a linear function for a projectile
 
