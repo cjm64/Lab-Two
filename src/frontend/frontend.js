@@ -2,14 +2,26 @@ function startGame() {
     new Phaser.Game(config);
 } //Phaser startgame
 
-var name = prompt("Please enter your name", "Username");
+
+//Username input, repeats if blank
+function nameself(){
+   var name = prompt("Please Enter a Username", "Username");
+    if (name == "") {
+        nameself();
+    }
+}
+
+nameself();
 
 var jason = {
-    'username' : name,
+    'name' : name,
     'vertical' : 0,
     'horizontal' : 0
 } //Initializes the dictionary that will be used to send JSON to server.
 
+var projectilelist = {
+
+}
 
 var config = {
     "type" : Phaser.AUTO,
@@ -50,8 +62,9 @@ var fire = 0;
 var board;
 var board1;
 var board2;
-var imm = -300
-//More Phaser Stuff and variables
+var movecam = false;
+var shotid = 0
+//More Phaser Stuff
 
 
 function preload(){
@@ -60,43 +73,58 @@ function preload(){
     this.load.image('Enemy', 'assets/enemy.png');
     this.load.image('EnemyProjectile', 'assets/bullet.png');
     this.load.image('Background', 'assets/bg.png');
-}//More Phaser Stuff PT. 3. Loads images for sprites
+}//More Phaser Stuff PT. 3
 
 function create () {
 
-
-
     playerProjectiles = this.physics.add.group({ classType: Projectile, runChildUpdate: true });
     enemyProjectiles = this.physics.add.group({ classType: Projectile, runChildUpdate: true });
-    //Creates classes for player projectiles and enemy projectiles, so that they don't shoot themselves. Unsure of how this might work in server, but probably easily doable.
+    //Creates classes for player bullets and enemy bullets, so that they don't shoot themselves. Unsure of how this might work in server, but probably easily doable.
 
+    for (y = -1; y < 23; y++)
+    {
+        for (x = -1; x < 23; x++)
+        {
+            this.add.image(800 * x, 800 * y, 'Background').setOrigin(0).setAlpha(1);
+        }
+    }
 
-    this.add.image(400, 400, 'Background');
-    //Background.jpg
-
-    player = this.physics.add.sprite(400, 600, 'Player');
+    player = this.physics.add.sprite(400, 400, 'Player');
     //Creates Player
 
-    player.setCollideWorldBounds(true);
+    player.setCollideWorldBounds(false);
     //Phaser function so that player cannot bypass world bounds
 
-    this.input.on('pointerdown', function (pointer, time, lastFired) {
-        //Only shoots if the player has not fired a shot in the past 20 frames
-         if (fire > 20) {
+    this.input.on('pointerdown', function (pointer) {
+        //Only shoots if the player has not fired in the past 20 frames.
+        if (fire > 20) {
             fire = 0
             if (player.active === false)
                 return;
 
-            var projectile = playerProjectiles.get().setActive(true).setVisible(true);
+            var bullet = playerProjectiles.get().setActive(true).setVisible(true);
 
-            if (projectile) {
-                projectile.shoot(player, pointer);
+            if (bullet) {
+                bullet.shoot(player, pointer);
                 //Projectile moves from shooter(player) to pointer(cursor).
-                this.physics.add.collider(enemy1, projectile, enemyHitFunction);
+                //this.physics.add.collider(enemy1, bullet, enemyHitFunction);
+                var cursorx = pointer.x
+                var cursory = pointer.y
+                var centerx = config['width'] / 2
+                var centery = config['height'] / 2
+                var angle = Math.atan( (cursorx - (config['width'] / 2)) / (cursory - (config['height'] / 2)));
+                var shootvariables = {
+                    'mousex' : 0,
+                    'mousey' : 0,
+                    'angle' : angle,
+                    'camwidth' : config['width'] / 2,
+                    'camheigh' : config['height'] / 2
+                }
+                var shootjson = JSON.stringify(shootvariables)
+
             }
         }
-
-    }, this); //Shoots a projectile when the mouse is clicked.
+    }, this); //Shoots a bullet when the mouse is clicked.
 
     enemy1 = this.physics.add.sprite(100, 100, 'Enemy');
     //Creates an enemy
@@ -118,30 +146,72 @@ function create () {
     hpText = this.add.text(16, 16, 'Health: 5', { fontSize: '32px', fill: '#000' });
     deathText = this.add.text(16, 116, 'Deaths: 0', { fontSize: '32px', fill: '#000' });
     board = this.add.text(550, 16, 'Top Players:', { fontSize: '32px', fill: '#000' });
-    board1 = this.add.text(550, 66, name + ": 0", { fontSize: '32px', fill: '#000' });
+    board1 = this.add.text(550, 66, 'Player: 0', { fontSize: '32px', fill: '#000' });
     board2 = this.add.text(550, 116, 'Enemy: 0', { fontSize: '32px', fill: '#000' });
 
-
+    this.cameras.main.startFollow(player, true);
+    this.cameras.main.setDeadzone(0, 0);
+    this.cameras.main.setZoom(1);
+    this.cameras.main.width = 800
+    this.cameras.main.height = 800
 
 
 }
 
-function update(time){
+function update(time, delta){
+    var cam = this.cameras.main;
 
     //It's the update function.
 
     var cursors = this.input.keyboard.createCursorKeys();
-    if (cursors.left.isDown) {jason['horizontal'] = -1;}
-    else if (cursors.right.isDown) {jason['horizontal'] = 1;}
-    else {jason['horizontal'] = 0;}
-    if (cursors.up.isDown) {jason['vertical'] = -1;}
-    else if (cursors.down.isDown) {jason['vertical'] = 1;}
-    else {jason['vertical'] = 0;}
-    if (cursors.up.isDown && cursors.down.isDown) {jason['vertical'] = 0;}
-    if (cursors.left.isDown && cursors.right.isDown) {jason['horizontal'] = 0;}
+    if (movecam)
+    {
+        if (cursors.left.isDown)
+        {
+            cam.scrollX -= 4;
+        }
+        else if (cursors.right.isDown)
+        {
+            cam.scrollX += 4;
+        }
+
+        if (cursors.up.isDown)
+        {
+            cam.scrollY -= 4;
+        }
+        else if (cursors.down.isDown)
+        {
+            cam.scrollY += 4;
+        }
+    }
+    if (cursors.left.isDown) {
+        jason['horizontal'] = -1;
+    }
+    else if (cursors.right.isDown) {
+        jason['horizontal'] = 1;
+    }
+    else {
+        jason['horizontal'] = 0;
+    }
+    if (cursors.up.isDown) {
+        jason['vertical'] = -1;
+    }
+    else if (cursors.down.isDown) {
+        jason['vertical'] = 1;
+    }
+    else {
+        jason['vertical'] = 0;
+    }
+    if (cursors.up.isDown && cursors.down.isDown) {
+        jason['vertical'] = 0;
+    }
+    if (cursors.left.isDown && cursors.right.isDown) {
+        jason['horizontal'] = 0;
+    }
+
+
+
     // Above code sets variable "horizontal" and "vertical" in dictionary to 1 or 0 based on arrow key inputs
-
-
 
     var jay = JSON.stringify(jason);
     var par = JSON.parse(jay);
@@ -151,18 +221,15 @@ function update(time){
     //Sets position for X and Y based on JSON, which is based on arrow key input.
     //Could be set to do velocity instead, but then players would be able to set own position in console
     //Using position instead of velocity the player can sort of bypass world bounds up to its center.
-    //Json (jay) = 'username': player's username 'horizontal' : 0 or 1, 'vertical' : 0 or 1
 
 
     enemyFire(enemy1, player, time, this);
-    //Enemy shoots a projectile whenever it's cooldown is over.
+    //Enemy shoots a bullet whenever it's cooldown is over.
 
     fire +=1
 
-
     return;
 }
-
 
 
 //Class for projectiles. Handles how they act.
@@ -191,19 +258,20 @@ var Projectile = new Phaser.Class({
         this.x = int.x
         this.y = int.y
 
-        this.angle = Math.atan( (dest.x-this.x) / (dest.y-this.y));
+        this.angle = Math.atan( (dest.x-(config['width'] / 2)) / (dest.y-(config['height'] / 2)));
 
         // Calculate the xSpeed and ySpeed of projectile to moves it from initial position to target
         this.xSpeed = this.speed*Math.sin(this.angle);
         this.ySpeed = this.speed*Math.cos(this.angle);
 
-        if (dest.y < this.y)
+        if (dest.y < config['height'] / 2)
         {
             this.xSpeed = -this.xSpeed
             this.ySpeed = -this.ySpeed
         }
 
         this.age = 0; // Age of projectile
+        shotid +=1
     },
 
     // Updates the position and age of the projectile each cycle
@@ -216,6 +284,7 @@ var Projectile = new Phaser.Class({
         this.x += this.xSpeed;
         this.y += this.ySpeed;
 
+
     }
 
 });
@@ -226,6 +295,7 @@ function enemyHitFunction(enemyHit, projectileHit)
 {
     // Randomize speed and direction after getting shot
     enemyHit.setVelocity(Phaser.Math.Between(80, 200), Phaser.Math.Between(80, 200));
+    // Reduce Health of the Enemy
     if (projectileHit.active === true && enemyHit.active === true)
     {
         enemyHit.health = enemyHit.health - 1;
