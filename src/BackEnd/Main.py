@@ -39,6 +39,12 @@ while True:
 
     print(infoList)
 
+    # update sql tables based on json
+
+    # update running list of objects based on sql
+
+    # from objects(things) we can update these and send a giant json to the server which then precedes
+    # to send that to the front end
     if breakLoop:
         break
 
