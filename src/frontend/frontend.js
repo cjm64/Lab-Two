@@ -9,8 +9,8 @@ var jason = {
 
 var config = {
     "type" : Phaser.AUTO,
-    "width" : 800,
-    "height" : 800,
+    "width" : 1600,
+    "height" : 1600,
     physics: {
         default: 'arcade',
         arcade: {
@@ -46,6 +46,7 @@ var fire = 0;
 var board;
 var board1;
 var board2;
+var movecam = false;
 //More Phaser Stuff
 
 
@@ -63,11 +64,17 @@ function create () {
     enemyBullets = this.physics.add.group({ classType: Bullet, runChildUpdate: true });
     //Creates classes for player bullets and enemy bullets, so that they don't shoot themselves. Unsure of how this might work in server, but probably easily doable.
 
-
-    this.add.image(400, 400, 'Background');
+    for (y = 0; y < 2; y++)
+    {
+        for (x = 0; x < 2; x++)
+        {
+            this.add.image(400 * x, 400 * y, 'Background').setOrigin(0).setAlpha(0.75);
+        }
+    }
+    //this.add.image(400, 400, 'Background');
     //Background.jpg
 
-    player = this.physics.add.sprite(400, 600, 'Player');
+    player = this.physics.add.sprite(400, 400, 'Player');
     //Creates Player
 
     player.setCollideWorldBounds(true);
@@ -113,24 +120,66 @@ function create () {
     board1 = this.add.text(550, 66, 'Player: 0', { fontSize: '32px', fill: '#000' });
     board2 = this.add.text(550, 116, 'Enemy: 0', { fontSize: '32px', fill: '#000' });
 
-
+    this.cameras.main.startFollow(player, true);
+    this.cameras.main.setDeadzone(100, 50);
+    this.cameras.main.setZoom(0.5);
+    this.input.on('pointerdown', function () {
+        moveCam = (moveCam) ? false: true;
+    });
 
 
 }
 
 function update(time, delta){
+    var cam = this.cameras.main;
 
     //It's the update function.
 
     var cursors = this.input.keyboard.createCursorKeys();
-    if (cursors.left.isDown) {jason['horizontal'] = -1;}
-    else if (cursors.right.isDown) {jason['horizontal'] = 1;}
-    else {jason['horizontal'] = 0;}
-    if (cursors.up.isDown) {jason['vertical'] = -1;}
-    else if (cursors.down.isDown) {jason['vertical'] = 1;}
-    else {jason['vertical'] = 0;}
-    if (cursors.up.isDown && cursors.down.isDown) {jason['vertical'] = 0;}
-    if (cursors.left.isDown && cursors.right.isDown) {jason['horizontal'] = 0;}
+    if (movecam)
+    {
+        if (cursors.left.isDown)
+        {
+            cam.scrollX -= 4;
+        }
+        else if (cursors.right.isDown)
+        {
+            cam.scrollX += 4;
+        }
+
+        if (cursors.up.isDown)
+        {
+            cam.scrollY -= 4;
+        }
+        else if (cursors.down.isDown)
+        {
+            cam.scrollY += 4;
+        }
+    }
+    if (cursors.left.isDown) {
+        jason['horizontal'] = -1;
+    }
+    else if (cursors.right.isDown) {
+        jason['horizontal'] = 1;
+    }
+    else {
+        jason['horizontal'] = 0;
+    }
+    if (cursors.up.isDown) {
+        jason['vertical'] = -1;
+    }
+    else if (cursors.down.isDown) {
+        jason['vertical'] = 1;
+    }
+    else {
+        jason['vertical'] = 0;
+    }
+    if (cursors.up.isDown && cursors.down.isDown) {
+        jason['vertical'] = 0;
+    }
+    if (cursors.left.isDown && cursors.right.isDown) {
+        jason['horizontal'] = 0;
+    }
     // Above code sets variable "horizontal" and "vertical" in dictionary to 1 or 0 based on arrow key inputs
 
     var jay = JSON.stringify(jason);
