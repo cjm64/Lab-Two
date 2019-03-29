@@ -107,7 +107,7 @@ function create () {
             if (bullet) {
                 bullet.shoot(player, pointer);
                 //Projectile moves from shooter(player) to pointer(cursor).
-                //this.physics.add.collider(enemy1, bullet, enemyHitFunction);
+                this.physics.add.collider(enemy1, bullet, enemyHitFunction);
                 var cursorx = pointer.x
                 var cursory = pointer.y
                 var centerx = config['width'] / 2
