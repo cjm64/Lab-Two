@@ -16,7 +16,7 @@ def users_event():
     newlist = []
     for item in list:
         newlist.append(item)
-    print(newlist)
+    #print(newlist)
     return json.dumps({'type': 'users', 'users': newlist, "online": len(users)})
 
 
@@ -64,13 +64,13 @@ async def register(websocket):
 async def unregister(websocket):
     num = 0
     we = websocketIndex.keys()
-    print(we)
+    #print(we)
     for thing in we:
         if thing == websocket:
-            print("ys")
+            #print("ys")
             del websocketIndex[websocket]
             break
-        print("here1")
+        #print("here1")
         num += 1
     users.remove(websocket)
     await notify_users()
