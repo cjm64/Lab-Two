@@ -10,6 +10,7 @@ function hitDetection(thing1, thing2) {
 
 function startGame() {
     new Phaser.Game(config);
+
 } //Phaser startgame
 
 
@@ -70,6 +71,8 @@ var config = {
     }
 }; //More Phaser Stuff
 
+// var scoreHTML = document.getElementById("score").innerHTML;
+// var myscoreHTML = document.getElementById("myscore").innerHTML;
 var player;
 var enemy1;
 var kills = 0;
@@ -174,20 +177,25 @@ function create () {
     enemy1.health = 5;
 
     //Scoreboard stuff. Should change to work with server and backend and stuff.
-    scoreText = this.add.text(16, 64, 'Kills: 0', { fontSize: '32px', fill: '#000' });
-    hpText = this.add.text(16, 16, 'Health: 5', { fontSize: '32px', fill: '#000' });
-    deathText = this.add.text(16, 116, 'Deaths: 0', { fontSize: '32px', fill: '#000' });
-    board = this.add.text(550, 16, 'Top Players:', { fontSize: '32px', fill: '#000' });
-    board1 = this.add.text(550, 66, name + ": 0", { fontSize: '32px', fill: '#000' });
-    board2 = this.add.text(550, 116, 'Enemy: 0', { fontSize: '32px', fill: '#000' });
+
+    //scoreText = this.add.text(16, 64, 'Kills: 0', { fontSize: '32px', fill: '#000' });
+    //hpText = this.add.text(16, 16, 'Health: 5', { fontSize: '32px', fill: '#000' });
+    //deathText = this.add.text(16, 116, 'Deaths: 0', { fontSize: '32px', fill: '#000' });
+    //board = this.add.text(550, 16, 'Top Players:', { fontSize: '32px', fill: '#000' });
+    //board1 = this.add.text(550, 66, name + ": 0", { fontSize: '32px', fill: '#000' });
+    //board2 = this.add.text(550, 116, 'Enemy: 0', { fontSize: '32px', fill: '#000' });
+    document.getElementById("score").innerHTML = "<h3>Enemy: 0</h3><h3>" + name + ": 0</h3>";
     this.cameras.main.startFollow(player, true);
     this.cameras.main.setDeadzone(0, 0);
     this.cameras.main.setZoom(1);
     this.cameras.main.width = 800
     this.cameras.main.height = 800
+
 }
 
 function update(time, delta){
+
+
     var cam = this.cameras.main;
 
     //It's the update function.
@@ -275,7 +283,8 @@ function update(time, delta){
         }
     }
     player.health = entitylist[0].health
-    hpText.setText("Health: " + player.health)
+    //hpText.setText("Health: " + player.health)
+    document.getElementById("myscore").innerHTML = "<h3>Health:" + player.health + "</h3><h3>Kills: " + kills+ "</h3><h3>Deaths: " + deaths + "</h3>";
     enemy1.health = entitylist[1].health
 
     if (player.health <= 0){
@@ -283,14 +292,21 @@ function update(time, delta){
         player.x = Phaser.Math.Between(50, 750)
         player.y = Phaser.Math.Between(50, 750)
         deaths += 1
-        deathText.setText("Deaths: " + deaths)
+        //deathText.setText("Deaths: " + deaths)
+        document.getElementById("myscore").innerHTML = "<h3>Health:" + player.health + "</h3><h3>Kills: " + kills+ "</h3><h3>Deaths: " + deaths + "</h3>";
         if (deaths >= kills){
-            board1.setText("Enemy: " + deaths)
-            board2.setText(name + ": " + kills)
+            // scoreHTML = "<h3>Enemy: "+ deaths +"</h3><h3>" + name + ": " + kills + "</h3>";
+            //scoreHTML = "something happened";
+            document.getElementById("score").innerHTML = "<h3>Enemy: "+ deaths +"</h3><h3>" + name + ": " + kills + "</h3>";
+            //board1.setText("Enemy: " + deaths)
+            //board2.setText(name + ": " + kills)
         }
         else {
-            board1.setText(name + ": " + kills)
-            board2.setText("Enemy: " + deaths)
+            // scoreHTML = "<h3>" + name + ": " + kills + "</h3><h3>Enemy: "+ deaths +"</h3>";
+            // scoreHTML = "something happened";
+            document.getElementById("score").innerHTML = "<h3>" + name + ": " + kills + "</h3><h3>Enemy: "+ deaths +"</h3>";
+            //board1.setText(name + ": " + kills)
+            //board2.setText("Enemy: " + deaths)
         }
     }
     if (enemy1.health <= 0){
@@ -298,14 +314,20 @@ function update(time, delta){
         enemy1.x = Phaser.Math.Between(50, 750)
         enemy1.y = Phaser.Math.Between(50, 750)
         kills += 1
-        scoreText.setText("Kills: " + kills)
+        //scoreText.setText("Kills: " + kills)
+        document.getElementById("myscore").innerHTML = "<h3>Health:" + player.health + "</h3><h3>Kills: " + kills+ "</h3><h3>Deaths: " + deaths + "</h3>";
         if (kills >= deaths){
-            board1.setText(name + ": " + kills)
-            board2.setText("Enemy: " + deaths)
+            // scoreHTML = "something happened";
+            document.getElementById("score").innerHTML = "<h3>" + name + ": " + kills + "</h3><h3>Enemy: "+ deaths +"</h3>";
+            //board1.setText(name + ": " + kills)
+            //board2.setText("Enemy: " + deaths)
         }
     else {
-            board1.setText("Enemy: " + deaths)
-            board2.setText(name + ": " + kills)
+            // scoreHTML = "<h3>Enemy: "+ deaths +"</h3><h3>" + name + ": " + kills + "</h3>";
+            // scoreHTML = "something happened";
+            document.getElementById("score").innerHTML = "<h3>Enemy: "+ deaths +"</h3><h3>" + name + ": " + kills + "</h3>";
+            //board1.setText("Enemy: " + deaths)
+            //board2.setText(name + ": " + kills)
         }
     }
 
@@ -321,12 +343,12 @@ function update(time, delta){
     fire +=1
     efire += 1
 
-    scoreText.setPosition(player.x - 384,player.y - 336);
-    hpText.setPosition(player.x - 384,player.y - 384);
-    deathText.setPosition(player.x - 384,player.y - 284);
-    board.setPosition(player.x + 150,player.y - 384);
-    board1.setPosition(player.x + 150,player.y - 336);
-    board2.setPosition(player.x + 150,player.y - 284);
+    //scoreText.setPosition(player.x - 384,player.y - 336);
+    //hpText.setPosition(player.x - 384,player.y - 384);
+    //deathText.setPosition(player.x - 384,player.y - 284);
+    //board.setPosition(player.x + 150,player.y - 384);
+    //board1.setPosition(player.x + 150,player.y - 336);
+    //board2.setPosition(player.x + 150,player.y - 284);
 
     return;
 }

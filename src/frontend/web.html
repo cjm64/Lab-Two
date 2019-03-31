@@ -6,29 +6,52 @@
     <style>
         body {
             background-color: linen;
-            margin-left: 25%;
         }
-        #leaderboard {
-            position: fixed;
-            z-index: 1;
+        #controls {
             top: 20px;
-            right: 20px;
-            width: 200px;
+            left: 20px;
+            width: 150px;
             height: 80%;
             background-color: lightblue;
+            z-index: 1;
+            position: fixed;
         }
-        .leadertext {
-
+        .text {
+            text-align: center;
+        }
+        #leaderboard {
+            top: 20px;
+            right: 20px;
+            width: 150px;
+            height: 80%;
+            background-color: lightblue;
+            z-index: 1;
+            position: fixed;
         }
     </style>
 </head>
-<body onload="startGame();">
-<div id="game"></div>
-<div id="leaderboard">
-    <div class="leadertext"id="kills"></div>
-    <div class="leadertext"id="deaths"></div>
-</div>
+<body align="center" onload="startGame();">
 
+<div align="center" id="game"></div>
+<div id="leaderboard">
+    <h3>Top Players:</h3>
+    <div class="text" id="score"></div>
+    <br />
+    <br />
+    <h3>Your Stats:</h3>
+    <div class="text" id="myscore">
+
+    </div>
+</div>
+<div id="controls">
+    <div class="text">
+        <h3>Controls:</h3>
+        <h4>Up: W</h4>
+        <h4>Down: S</h4>
+        <h4>Left: A</h4>
+        <h4>Right: D</h4>
+    </div>
+</div>
 
 </body>
 </html>
