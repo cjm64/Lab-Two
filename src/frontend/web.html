@@ -3,10 +3,32 @@
     <title>Epic Victory Royale</title>
     <script src="https://cdn.jsdelivr.net/npm/phaser@3.15.1/dist/phaser-arcade-physics.min.js"></script>
     <script src="frontend.js"></script>
-</head>
-<body align="center" onload="startGame();">
+    <style>
+        body {
+            background-color: linen;
+            margin-left: 25%;
+        }
+        #leaderboard {
+            position: fixed;
+            z-index: 1;
+            top: 20px;
+            right: 20px;
+            width: 200px;
+            height: 80%;
+            background-color: lightblue;
+        }
+        .leadertext {
 
-<div align="center" id="game"></div>
+        }
+    </style>
+</head>
+<body onload="startGame();">
+<div id="game"></div>
+<div id="leaderboard">
+    <div class="leadertext"id="kills"></div>
+    <div class="leadertext"id="deaths"></div>
+</div>
+
 
 </body>
 </html>
