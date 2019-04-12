@@ -3,6 +3,9 @@ function startGame() {
 } //Phaser startgame
 
 
+
+
+
 //Username input, repeats if blank
 function nameself(){
    var name = prompt("Please Enter a Username", "Username");
@@ -19,6 +22,7 @@ var jason = {
     'horizontal' : 0,
     'angle': null
 } //Initializes the dictionary that will be used to send JSON to server.
+
 
 var projectilelist = {
 
@@ -215,11 +219,36 @@ function update(time, delta){
 
     // Above code sets variable "horizontal" and "vertical" in dictionary to 1 or 0 based on arrow key inputs
 
-    var jay = JSON.stringify(jason);
+    var jay = JSON.stringify(Movement);
     var par = JSON.parse(jay);
 
-    player.x = player.x + (par['horizontal'] * 4);
-    player.y = player.y + (par['vertical'] * 4);
+    if (par["W"] && par["S"]){
+        player.y = 0;
+    }
+    else if(par["W"]){
+        player.y = 4
+    }
+    else if(par["S"]){
+        player.y = -4
+    }
+    else{
+        player.y = 0
+    }
+    if (par["A"] && par["D"]){
+        player.x = 0;
+    }
+    else if(par["D"]){
+        player.x = 4
+    }
+    else if(par["A"]){
+        player.x = -4
+    }
+    else{
+        player.x = 0
+    }
+
+    //player.x = player.x + (par['horizontal'] * 4);
+    //player.y = player.y + (par['vertical'] * 4);
     //Sets position for X and Y based on JSON, which is based on arrow key input.
     //Could be set to do velocity instead, but then players would be able to set own position in console
     //Using position instead of velocity the player can sort of bypass world bounds up to its center.
