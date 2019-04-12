@@ -16,7 +16,8 @@ nameself();
 var jason = {
     'name' : name,
     'vertical' : 0,
-    'horizontal' : 0
+    'horizontal' : 0,
+    'angle': null
 } //Initializes the dictionary that will be used to send JSON to server.
 
 var projectilelist = {
@@ -184,6 +185,7 @@ function update(time, delta){
             cam.scrollY += 4;
         }
     }
+
     if (cursors.left.isDown) {
         jason['horizontal'] = -1;
     }
