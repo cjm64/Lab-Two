@@ -6,6 +6,9 @@ import sqlite3
 import json
 import socket
 import eventlet
+from threading import Thread
+
+eventlet.monkey_patch()
 
 jsonString = ""
 breakLoop = False
@@ -61,11 +64,11 @@ BackEnd.OurClasses.theWorld
 
 """created TCP socket for communication between controller and Model
 just basic right now"""
-model_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-model_socket.connect(('localhost', 8000))
-eventlet.monkey_patch()
+controller_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+controller_socket.connect(('localhost', 8000))
 
-def listen_to_model(the_socket):
+
+def listen_to_controller(the_socket):
     delimiter = "~"
     buffer = ""
     while True:
@@ -73,6 +76,9 @@ def listen_to_model(the_socket):
         while delimiter in buffer:
             message = buffer[:buffer.find(delimiter)]
             buffer = buffer[buffer.find(delimiter)+1:]
+
+
+eventlet.spawn(target=listen_to_controller, args=(controller_socket,)).start()
 
 while True:
 

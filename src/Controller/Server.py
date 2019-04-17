@@ -3,12 +3,14 @@ from flask_socketio import SocketIO
 import eventlet
 import socket
 import json
+from threading import Thread
 
+eventlet.monkey_patch()
 app = Flask(__name__)
 socket_server = SocketIO(app)
 model_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-#model_socket.connect(('localhost', 8000))
-eventlet.monkey_patch()
+#model_socket.connect(('localhost', 8000)) only if main is active
+
 
 def listen_to_model(the_socket):
     delimiter = "~"
@@ -20,6 +22,10 @@ def listen_to_model(the_socket):
             buffer = buffer[buffer.find(delimiter)+1:]
             socket_server.emit('message', message)
 
+
+Thread(target=listen_to_model, args=(model_socket,)).start()
+
+
 @app.route('/')
 def index():
     return send_from_directory('frontend', 'web.html')
@@ -30,7 +36,8 @@ usernameToSid = {}
 
 @socket_server.on('register')
 def got_message(username):
-    usernameToSid[username] = request.sid
+    new_player = {"type": "New Player", "username": username}
+    model_socket.sendall(json.dumps(new_player).encode())
 
 # Possibly make each response individual for each button(ex. W,A,S,D, MouseClick) or all one response
 
