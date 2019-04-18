@@ -4,6 +4,11 @@ import backend1.Backend
 import time
 import sqlite3
 import json
+import socket
+import eventlet
+from threading import Thread
+
+eventlet.monkey_patch()
 
 jsonString = ""
 breakLoop = False
@@ -54,6 +59,24 @@ cur.execute('INSERT INTO projectiles VALUES ("993", 10, 10, 49, 230)')
 # BackEnd.OurClasses.theWorld
 #       - .boundaryX
 #       - .boundaryY
+
+"""created TCP socket for communication between controller and Model
+just basic right now"""
+controller_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+controller_socket.connect(('localhost', 8000))
+
+
+def listen_to_controller(the_socket):
+    delimiter = "~"
+    buffer = ""
+    while True:
+        buffer += the_socket.recv(1024).decode()
+        while delimiter in buffer:
+            message = buffer[:buffer.find(delimiter)]
+            buffer = buffer[buffer.find(delimiter)+1:]
+
+
+eventlet.spawn(target=listen_to_controller, args=(controller_socket,)).start()
 
 
 while True:
