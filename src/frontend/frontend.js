@@ -218,7 +218,7 @@ function update(time, delta){
 
 
     // Above code sets variable "horizontal" and "vertical" in dictionary to 1 or 0 based on arrow key inputs
-
+/*
     var jay = JSON.stringify(Movement);
     var par = JSON.parse(jay);
 
@@ -246,7 +246,7 @@ function update(time, delta){
     else{
         player.x = 0
     }
-
+*/
     //player.x = player.x + (par['horizontal'] * 4);
     //player.y = player.y + (par['vertical'] * 4);
     //Sets position for X and Y based on JSON, which is based on arrow key input.

@@ -3,6 +3,7 @@ import BackEnd.OurClasses
 import backend1.Backend
 import time
 import sqlite3
+
 import json
 import socket
 import eventlet
@@ -43,7 +44,9 @@ cur.execute('INSERT INTO projectiles VALUES ("993", 10, 10, 49, 230)')
 
 # we MIGHT want to put another column in the table to determine if it is a projectile or not - edit: nope, just a table
 
-# code in this block will execute every 1 seconds (not including runtime)
+# we want to implement actors
+# likely, one actor that takes a json from server, and updates sql (I think)
+# another actor that reads the sql and sends to the server (I think)
 
 
 #can create multi line comments with 3" (useful for comenting out code)"
@@ -80,11 +83,22 @@ def listen_to_controller(the_socket):
 
 eventlet.spawn(target=listen_to_controller, args=(controller_socket,)).start()
 
+
+
+
+
+
+
+
 while True:
+    # first we need json from the server
 
     # first we want to update every "thing" and "theWorld"
     # "theWorld" is actually static but still update in case the server resets
-    #
+    # player list is generated
+    playerList = cur.execute('SELECT * FROM players WHERE playerName=?',("Jerry",))
+
+    for player in playerList:
 
 
 
@@ -103,7 +117,8 @@ while True:
 
 
 
-    player = cur.execute('SELECT * FROM players WHERE playerName=?',("Jerry",))
+
+    # player = cur.execute('SELECT * FROM players WHERE playerName=?',("Jerry",))
     infoList = []
     for i in player:
         infoList.append(i)
