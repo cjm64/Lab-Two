@@ -4,6 +4,11 @@ import backend1.Backend
 import time
 import sqlite3
 import json
+import socket
+import eventlet
+from threading import Thread
+
+eventlet.monkey_patch()
 
 jsonString = ""
 breakLoop = False
@@ -40,21 +45,40 @@ cur.execute('INSERT INTO projectiles VALUES ("993", 10, 10, 49, 230)')
 
 # code in this block will execute every 1 seconds (not including runtime)
 
-# BackEnd.JakesFunctions.hitDetection(thing1, thing2)
-# BackEnd.JakesFunctions.offMapDetection(thing1, world)
-# BackEnd.JakesFunctions.updatePosition(thing, newX, newY)
-# BackEnd.JakesFunctions.createNewPlayer(locationThing, theName)
-# backend1.Backend.elimination(hit, p1, p2)
-# backend1.Backend.scoreBoard(lst)
-# backend1.Backend.spawnLocation()
-# BackEnd.OurClasses.thing(x, y)
-#       - .name
-#       - .sizeX
-#       - .sizeY
-# BackEnd.OurClasses.theWorld
-#       - .boundaryX
-#       - .boundaryY
 
+#can create multi line comments with 3" (useful for comenting out code)"
+"""BackEnd.JakesFunctions.hitDetection(thing1, thing2)
+BackEnd.JakesFunctions.offMapDetection(thing1, world)
+BackEnd.JakesFunctions.updatePosition(thing, newX, newY)
+BackEnd.JakesFunctions.createNewPlayer(locationThing, theName)
+backend1.Backend.elimination(hit, p1, p2)
+backend1.Backend.scoreBoard(lst)
+backend1.Backend.spawnLocation()
+BackEnd.OurClasses.thing(x, y)
+      - .name
+      - .sizeX
+      - .sizeY
+BackEnd.OurClasses.theWorld
+      - .boundaryX
+      - .boundaryY"""
+
+"""created TCP socket for communication between controller and Model
+just basic right now"""
+controller_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+controller_socket.connect(('localhost', 8000))
+
+
+def listen_to_controller(the_socket):
+    delimiter = "~"
+    buffer = ""
+    while True:
+        buffer += the_socket.recv(1024).decode()
+        while delimiter in buffer:
+            message = buffer[:buffer.find(delimiter)]
+            buffer = buffer[buffer.find(delimiter)+1:]
+
+
+eventlet.spawn(target=listen_to_controller, args=(controller_socket,)).start()
 
 while True:
 
