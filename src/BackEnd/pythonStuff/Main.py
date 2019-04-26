@@ -1,13 +1,8 @@
-import BackEnd.JakesFunctions
-import BackEnd.OurClasses
-import backend1.Backend
 import time
 import sqlite3
 
-import json
 import socket
 import eventlet
-from threading import Thread
 
 eventlet.monkey_patch()
 

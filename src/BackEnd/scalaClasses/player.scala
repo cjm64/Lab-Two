@@ -1,6 +1,6 @@
 package BackEnd.scalaClasses
 
-class Player(x: Double, y: Double) {
+class Player(var x: Double, var y: Double) {
 
 
   var sizeX: Double = 32.0

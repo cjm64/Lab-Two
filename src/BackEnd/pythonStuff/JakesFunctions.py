@@ -1,19 +1,17 @@
-
-
-import BackEnd.OurClasses
-import BackEnd.OurClasses
+import BackEnd
+import BackEnd.pythonStuff.OurClasses
 
 playerList = []
 # this data should be stored in sql and not a list
 
 
-World = BackEnd.OurClasses.theWorld
+World = BackEnd.pythonStuff.OurClasses.theWorld
 
-player = BackEnd.OurClasses.thing(10, 10)
+player = BackEnd.pythonStuff.OurClasses.thing(10, 10)
 player.sizeX = 20
 player.sizeY = 20
 
-projectile = BackEnd.OurClasses.thing(8, 15) # this position is outside of the player's range
+projectile = BackEnd.pythonStuff.OurClasses.thing(8, 15) # this position is outside of the player's range
 projectile.sizeX = 1
 projectile.sizeY = 10 # because of this size however, it would be in the player's range
 
@@ -50,7 +48,7 @@ def updatePosition(thing, newX, newY):
 def createNewPlayer(locationThing, theName):
     # use random spawn location function from emily's backend
     # use "name" from justin's networking
-    newPlayer = BackEnd.OurClasses.thing(locationThing.x, locationThing.y)
+    newPlayer = BackEnd.pythonStuff.OurClasses.thing(locationThing.x, locationThing.y)
     newPlayer.sizeX = 20
     newPlayer.sizeY = 20
     newPlayer.name = theName

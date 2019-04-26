@@ -1,6 +1,6 @@
 package BackEnd.scalaClasses
 
-class Projectile(x: Double, y: Double) {
+class Projectile(var x: Double, var y: Double) {
 
 
   // note that I don't actually know the size of the projectile

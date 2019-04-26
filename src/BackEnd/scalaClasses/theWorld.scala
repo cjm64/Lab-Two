@@ -3,8 +3,8 @@ package BackEnd.scalaClasses
 class theWorld {
 
 
-  var BoundaryX: Double = _
-  var BoundaryY: Double = _
+  var boundX: Double = _
+  var boundY: Double = _
 
 
 }
