@@ -9,9 +9,9 @@ eventlet.monkey_patch()
 app = Flask(__name__)
 socket_server = SocketIO(app)
 model_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-#model_socket.connect(('localhost', 8000)) only if main is active
+# model_socket.connect(('localhost', 8000)) only if main is active
 
-
+"""
 def listen_to_model(the_socket):
     delimiter = "~"
     buffer = ""
@@ -23,14 +23,27 @@ def listen_to_model(the_socket):
             socket_server.emit('message', message)
 
 
-Thread(target=listen_to_model, args=(model_socket,)).start()
+Thread(target=listen_to_model, args=(model_socket,)).start()"""
 
 
 @app.route('/')
 def index():
-    return send_from_directory('frontend', 'web.html')
+    print("here")
+    return send_from_directory('../frontend', 'web.html')
 
 
+@app.route('/frontend.js')
+def frontJS():
+    print("here")
+    return send_from_directory('../frontend/js', 'frontend.js')
+
+
+@app.route("/assets/<path:path>")
+def asset(path):
+    return send_from_directory('../frontend/assets', path)
+
+
+app.run(port=8080)
 usernameToSid = {}
 
 
@@ -42,13 +55,14 @@ def got_message(username):
 # Possibly make each response individual for each button(ex. W,A,S,D, MouseClick) or all one response
 
 
-@socket_server.on('projectile')
+""""@socket_server.on('projectile')
+def got_message(jason):
+    model_socket.sendall(json.dumps(jason).encode())"""
+
+
+@socket_server.on('Jason')
 def got_message(jason):
     model_socket.sendall(json.dumps(jason).encode())
 
-
-@socket_server.on('Movement')
-def got_message(jason):
-    model_socket.sendall(json.dumps(jason).encode())
 
 socket_server.run(app, port=8080)

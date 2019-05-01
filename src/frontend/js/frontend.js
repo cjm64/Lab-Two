@@ -2,19 +2,35 @@ function startGame() {
     new Phaser.Game(config);
 } //Phaser startgame
 
+var name;
+var gameState;
 
 
+var socket = io.connect({transports: ['websocket']});
+socket.on('connect', function (event) {
+    name = prompt("Please Enter a Username", "Username");
+    while(isUsed(name)){
+        name = prompt("Please Enter Another Username", name);
+    };
+    socket.emit("register", name)
+});
+socket.on('message', function (event) {
+    // received a message from the server
+    console.log(event);
+    gameState = event.parse()
+});
 
 
 //Username input, repeats if blank
-function nameself(){
+/*function nameself(){
    var name = prompt("Please Enter a Username", "Username");
     if (name == "") {
         nameself();
     }
-}
+}*/
 
-nameself();
+//nameself();
+
 
 var jason = {
     'name' : name,
@@ -22,6 +38,8 @@ var jason = {
     'horizontal' : 0,
     'angle': null
 } //Initializes the dictionary that will be used to send JSON to server.
+
+var lastJason = jason;
 
 
 var projectilelist = {
@@ -215,7 +233,10 @@ function update(time, delta){
         jason['horizontal'] = 0;
     }
 
-
+    if(jason !== lastJason){
+        socket.emit("Jason", json.stringify())
+        lastJason = jason
+    }
 
     // Above code sets variable "horizontal" and "vertical" in dictionary to 1 or 0 based on arrow key inputs
 /*
