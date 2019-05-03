@@ -5,16 +5,9 @@ player = {
   "x": Double,
   "y": Double,
   "Immunity": Boolean,
+  "angle": null or Int // if int then new projectile, null otherwise
 }
 players = a list of all players and their data in the format above
-
-projectile = {
-  "x": Double,
-  "y": Double,
-  "angle": Double
-}
-newProjectiles = a list of all newly created projectiles and their data in the format above
-
 
 backToFrontJSON = {
   "PlayerData":  players,
