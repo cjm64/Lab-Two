@@ -9,14 +9,13 @@ var gameState;
 var socket = io.connect({transports: ['websocket']});
 socket.on('connect', function (event) {
     name = prompt("Please Enter a Username", "Username");
-    while(isUsed(name)){
+    /*while(isUsed(name)){
         name = prompt("Please Enter Another Username", name);
-    };
+    };*/
     socket.emit("register", name)
 });
 socket.on('message', function (event) {
     // received a message from the server
-    console.log(event);
     gameState = event.parse()
 });
 
@@ -165,15 +164,9 @@ function create () {
     enemy1.lastFired = 0;
 
     //Scoreboard stuff. Should change to work with server and backend and stuff.
-    scoreText = this.add.text(16, 66, 'Kills: 0', { fontSize: '32px', fill: '#000' });
-    hpText = this.add.text(16, 16, 'Health: 5', { fontSize: '32px', fill: '#000' });
-    deathText = this.add.text(16, 116, 'Deaths: 0', { fontSize: '32px', fill: '#000' });
-    board = this.add.text(550, 16, 'Top Players:', { fontSize: '32px', fill: '#000' });
-    board1 = this.add.text(550, 66, 'Player: 0', { fontSize: '32px', fill: '#000' });
-    board2 = this.add.text(550, 116, 'Enemy: 0', { fontSize: '32px', fill: '#000' });
 
-    this.cameras.main.startFollow(player, true);
-    this.cameras.main.setDeadzone(0, 0);
+    //this.cameras.main.startFollow(player, true);
+    //this.cameras.main.setDeadzone(0, 0);
     this.cameras.main.setZoom(1);
     this.cameras.main.width = 800
     this.cameras.main.height = 800
@@ -181,37 +174,26 @@ function create () {
 
 }
 
+
 function update(time, delta){
     var cam = this.cameras.main;
 
     //It's the update function.
 
+    for(players in gameState["Playerdata"])
+
+
+
     var cursors = this.input.keyboard.createCursorKeys();
-    if (movecam)
-    {
-        if (cursors.left.isDown)
-        {
-            cam.scrollX -= 4;
-        }
-        else if (cursors.right.isDown)
-        {
-            cam.scrollX += 4;
-        }
-
-        if (cursors.up.isDown)
-        {
-            cam.scrollY -= 4;
-        }
-        else if (cursors.down.isDown)
-        {
-            cam.scrollY += 4;
-        }
-    }
-
+    //cam.x = player.x
+    //cam.y = player.y
     if (cursors.left.isDown) {
+
         jason['horizontal'] = -1;
     }
     else if (cursors.right.isDown) {
+
+        console.log("here")
         jason['horizontal'] = 1;
     }
     else {
@@ -279,7 +261,8 @@ function update(time, delta){
     //Enemy shoots a bullet whenever it's cooldown is over.
 
     fire +=1
-
+    cam.x = player.x - 400
+    cam.y = player.y - 400
     return;
 }
 

@@ -8,7 +8,7 @@ from threading import Thread
 eventlet.monkey_patch()
 app = Flask(__name__)
 socket_server = SocketIO(app)
-model_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+# model_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 # model_socket.connect(('localhost', 8000)) only if main is active
 
 """
@@ -34,7 +34,6 @@ def index():
 
 @app.route('/frontend.js')
 def frontJS():
-    print("here")
     return send_from_directory('../frontend/js', 'frontend.js')
 
 
@@ -43,14 +42,14 @@ def asset(path):
     return send_from_directory('../frontend/assets', path)
 
 
-app.run(port=8080)
 usernameToSid = {}
 
 
 @socket_server.on('register')
 def got_message(username):
     new_player = {"type": "New Player", "username": username}
-    model_socket.sendall(json.dumps(new_player).encode())
+    print(username)
+    # model_socket.sendall(json.dumps(new_player).encode())
 
 # Possibly make each response individual for each button(ex. W,A,S,D, MouseClick) or all one response
 
@@ -62,7 +61,9 @@ def got_message(jason):
 
 @socket_server.on('Jason')
 def got_message(jason):
-    model_socket.sendall(json.dumps(jason).encode())
+    print("message")
+    delimiter = "~"
+    #model_socket.sendall((json.dumps(jason) + delimiter).encode())
 
 
-socket_server.run(app, port=8080)
+socket_server.run(app, port=8053)
