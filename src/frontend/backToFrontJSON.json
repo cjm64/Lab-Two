@@ -5,7 +5,7 @@ player = {
   "x": Double,
   "y": Double,
   "Immunity": Boolean,
-  "angle": null or Int // if int then new projectile, null otherwise
+  "Projectile": null or Int // if int then new projectile, null otherwise
 }
 players = a list of all players and their data in the format above
 
