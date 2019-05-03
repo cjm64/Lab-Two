@@ -49,7 +49,8 @@ usernameToSid = {}
 def got_message(username):
     new_player = {"type": "New Player", "username": username}
     print(username)
-    # model_socket.sendall(json.dumps(new_player).encode())
+    delimiter = "~"
+    # model_socket.sendall(json.dumps(username + delimiter).encode())
 
 # Possibly make each response individual for each button(ex. W,A,S,D, MouseClick) or all one response
 

@@ -5,14 +5,31 @@ function startGame() {
 var name;
 var gameState;
 
+var jason = {
+    'name' : name,
+    'vertical' : 0,
+    'horizontal' : 0,
+    'angle': null
+} //Initializes the dictionary that will be used to send JSON to server.
+
+
+function isUsed(name){
+    gamestate["PlayerData"]["Name"].foreach(function (nm){
+        if(name == nm){
+            return true
+        }
+    });
+    return false
+}
 
 var socket = io.connect({transports: ['websocket']});
 socket.on('connect', function (event) {
     name = prompt("Please Enter a Username", "Username");
-    /*while(isUsed(name)){
+    while(isUsed(name)){
         name = prompt("Please Enter Another Username", name);
-    };*/
-    socket.emit("register", name)
+    };
+    jason["name"] = name
+    socket.emit("register", jason)
 });
 socket.on('message', function (event) {
     // received a message from the server
