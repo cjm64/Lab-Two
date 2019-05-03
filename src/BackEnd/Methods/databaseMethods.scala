@@ -125,6 +125,7 @@ object databaseMethods {
     val deltaS: Long = System.nanoTime() - time
 
     statement = connection.prepareStatement("UPDATE Projectiles SET x=?, y=?, lastUpdate=?, lifetime=? WHERE id=?")
+    // this might be a problem?
     statement.setDouble(1, x+(math.cos(angle)*speed*deltaS))
     statement.setDouble(2, y+(math.sin(angle)*speed*deltaS))
     statement.setLong(3, time)  // System.nanoTime()?
