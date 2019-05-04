@@ -5,6 +5,15 @@ function startGame() {
 var name;
 var gameState;
 
+function isUsed(name){
+    gameState["Playerdata"].foreach(function(na){
+        if(na["Name"] == name){
+            return true
+        }
+    })
+    return false
+}
+
 function test(){
     var modal = document.getElementById('myModal');
     var btn = document.getElementById("leaderboard");
@@ -21,7 +30,6 @@ function test(){
     }*/
 }
 
-
 var socket = require('socket.io-client')('http://localhost:8053');
 socket.on('connect', function(){
     console.log('WebSocket Client Connected');
@@ -33,50 +41,6 @@ socket.on('event', function(data){
 socket.on('disconnect', function(){
     console.log('WebSocket Client Disconnected');
 });
-
-/*var WebSocketClient = require('websocket').client;
-
-var client = new WebSocketClient();
-
-client.on('connectFailed', function(error) {
-    console.log("here")
-    console.log('Connect Error: ' + error.toString());
-});
-
-client.on('connect', function(connection) {
-    console.log('WebSocket Client Connected');
-    connection.on('error', function(error) {
-        console.log("Connection Error: " + error.toString());
-    });
-    connection.on('close', function() {
-        console.log('echo-protocol Connection Closed');
-    });
-    connection.on('message', function(message) {
-        if (message.type === 'utf8') {
-            console.log("Received: '" + message.utf8Data + "'");
-            gameState = message.parse()
-        }
-    });
-
-});
-
-client.connect('http://localhost:8053/');*/
-
-
-
-
-/*var socket = io.connect({transports: ['websocket']});
-socket.on('connect', function (event) {
-    name = prompt("Please Enter a Username", "Username");
-    while(isUsed(name)){
-        name = prompt("Please Enter Another Username", name);
-    };
-    socket.emit("register", name)
-});
-socket.on('message', function (event) {
-    // received a message from the server
-    gameState = event.parse()
-});*/
 
 
 //Username input, repeats if blank
@@ -100,9 +64,8 @@ var jason = {
 var lastJason = jason;
 
 
-var projectilelist = {
-
-}
+var playerlist = []
+var bulletlist = []
 
 var config = {
     "type" : Phaser.AUTO,
@@ -160,6 +123,8 @@ function create () {
 
     playerProjectiles = this.physics.add.group({ classType: Projectile, runChildUpdate: true });
     enemyProjectiles = this.physics.add.group({ classType: Projectile, runChildUpdate: true });
+    enemies = this.physics.add.group({classType: otherUsers, runChildUpdate: true });
+    playerShots = this.physics.add.group({classType: Shot, runChildUpdate: true });
     //Creates classes for player bullets and enemy bullets, so that they don't shoot themselves. Unsure of how this might work in server, but probably easily doable.
 
     for (y = -1; y < 23; y++)
@@ -188,7 +153,7 @@ function create () {
             if (bullet) {
                 bullet.shoot(player, pointer);
                 //Projectile moves from shooter(player) to pointer(cursor).
-                this.physics.add.collider(enemy1, bullet, enemyHitFunction);
+//                this.physics.add.collider(enemy1, bullet, enemyHitFunction);
                 var cursorx = pointer.x
                 var cursory = pointer.y
                 var centerx = config['width'] / 2
@@ -201,59 +166,109 @@ function create () {
                     'camwidth' : config['width'] / 2,
                     'camheigh' : config['height'] / 2
                 }
-                jason["angle"] = angle
                 var shootjson = JSON.stringify(shootvariables)
 
             }
         }
     }, this); //Shoots a bullet when the mouse is clicked.
 
-    enemy1 = this.physics.add.sprite(100, 100, 'Enemy');
+//    enemy1 = this.physics.add.sprite(100, 100, 'Enemy');
     //Creates an enemy
 
-    enemy1.setCollideWorldBounds(true);
+//    enemy1.setCollideWorldBounds(true);
     //Example enemy can't move through world
-    enemy1.setVelocity(Phaser.Math.Between(80, 200), Phaser.Math.Between(80, 200));
+//    enemy1.setVelocity(Phaser.Math.Between(80, 200), Phaser.Math.Between(80, 200));
     //Randomize example enemy X and Y velocities
-    enemy1.setBounce(1)
+//    enemy1.setBounce(1)
     //Example enemy bounces off wall
 
     // Set object variables
     player.health = 5;
-    enemy1.health = 5;
-    enemy1.lastFired = 0;
+//    enemy1.health = 5;
+//    enemy1.lastFired = 0;
 
     //Scoreboard stuff. Should change to work with server and backend and stuff.
+    scoreText = this.add.text(16, 66, 'Kills: 0', { fontSize: '32px', fill: '#000' });
+    hpText = this.add.text(16, 16, 'Health: 5', { fontSize: '32px', fill: '#000' });
+    deathText = this.add.text(16, 116, 'Deaths: 0', { fontSize: '32px', fill: '#000' });
+    board = this.add.text(550, 16, 'Top Players:', { fontSize: '32px', fill: '#000' });
+    board1 = this.add.text(550, 66, 'Player: 0', { fontSize: '32px', fill: '#000' });
+    board2 = this.add.text(550, 116, 'Enemy: 0', { fontSize: '32px', fill: '#000' });
 
-    //this.cameras.main.startFollow(player, true);
-    //this.cameras.main.setDeadzone(0, 0);
+    this.cameras.main.startFollow(player, true);
+    this.cameras.main.setDeadzone(0, 0);
     this.cameras.main.setZoom(1);
     this.cameras.main.width = 800
     this.cameras.main.height = 800
 
 
-}
+    for (var i = 0; i < 596; i++){
+        playerlist.push({"x" : Phaser.Math.Between(300,500), "y" : Phaser.Math.Between(300,500), "xSpeed" :  Math.random() * Phaser.Math.Between(-10,10), "ySpeed" : Math.random() * Phaser.Math.Between(-10,10)})
+    }
+    for (var i = 0; i < 300; i++){
+        bulletlist.push({"x" : Phaser.Math.Between(300,500), "y" : Phaser.Math.Between(300,500), "xSpeed" : Math.random() * Phaser.Math.Between(-10,10), "ySpeed" : Math.random() * Phaser.Math.Between(-10,10)})
+    }
 
+
+}
 
 function update(time, delta){
     var cam = this.cameras.main;
 
+    for(var i = 0; i < playerlist.length; i++){
+        if(Math.abs(player.x - playerlist[i]["x"]) < 500 && Math.abs(player.y - playerlist[i]["y"]) < 500) {
+            var xd = enemies.get().setActive(true).setVisible(true);
+            xd.x = playerlist[i]["x"]
+            xd.y = playerlist[i]["y"]
+
+
+            xd.xSpeed = playerlist[i]["xSpeed"]
+            xd.ySpeed = playerlist[i]["ySpeed"]
+        }
+        playerlist[i]["x"] += playerlist[i]["xSpeed"]
+        playerlist[i]["y"] += playerlist[i]["ySpeed"]
+    }
+
+    for(var i = 0; i < bulletlist.length; i++){
+        if(Math.abs(player.x - bulletlist[i]["x"]) < 500 && Math.abs(player.y - bulletlist[i]["y"]) < 500) {
+            var xd = playerShots.get().setActive(true).setVisible(true);
+            xd.x = bulletlist[i]["x"]
+            xd.y = bulletlist[i]["y"]
+            xd.xSpeed = bulletlist[i]["xSpeed"]
+            xd.ySpeed = bulletlist[i]["ySpeed"]
+        }
+        bulletlist[i]["x"] += bulletlist[i]["xSpeed"]
+        bulletlist[i]["y"] += bulletlist[i]["ySpeed"]
+    }
+
     //It's the update function.
 
-    //for(players in gameState["Playerdata"])
-
-
-
     var cursors = this.input.keyboard.createCursorKeys();
-    //cam.x = player.x
-    //cam.y = player.y
-    if (cursors.left.isDown) {
+    if (movecam)
+    {
+        if (cursors.left.isDown)
+        {
+            cam.scrollX -= 4;
+        }
+        else if (cursors.right.isDown)
+        {
+            cam.scrollX += 4;
+        }
 
+        if (cursors.up.isDown)
+        {
+            cam.scrollY -= 4;
+        }
+        else if (cursors.down.isDown)
+        {
+            cam.scrollY += 4;
+        }
+    }
+
+    if (cursors.left.isDown) {
         jason['horizontal'] = -1;
     }
     else if (cursors.right.isDown) {
-
-        console.log("here")
         jason['horizontal'] = 1;
     }
     else {
@@ -276,7 +291,7 @@ function update(time, delta){
     }
 
     if(jason !== lastJason){
-        client.send("Jason", json.stringify())
+        socket.emit("Jason", JSON.stringify(jason))
         lastJason = jason
     }
 
@@ -317,12 +332,11 @@ function update(time, delta){
     //Using position instead of velocity the player can sort of bypass world bounds up to its center.
 
 
-    enemyFire(enemy1, player, time, this);
+//    enemyFire(enemy1, player, time, this);
     //Enemy shoots a bullet whenever it's cooldown is over.
 
     fire +=1
-    cam.x = player.x - 400
-    cam.y = player.y - 400
+
     return;
 }
 
@@ -347,13 +361,14 @@ var Projectile = new Phaser.Class({
         },
 
     //Fire function for projectile. Moves from object shooting to target
-    shoot: function (x, y, angle)
+    shoot: function (int, dest)
     {
         // Initial position is set to the object shooting's position
-        this.x = x
-        this.y = y
+        this.x = int.x
+        this.y = int.y
 
-        this.angle = angle
+        this.angle = Math.atan( (dest.x-(config['width'] / 2)) / (dest.y-(config['height'] / 2)));
+
         // Calculate the xSpeed and ySpeed of projectile to moves it from initial position to target
         this.xSpeed = this.speed*Math.sin(this.angle);
         this.ySpeed = this.speed*Math.cos(this.angle);
@@ -379,6 +394,57 @@ var Projectile = new Phaser.Class({
         this.y += this.ySpeed;
 
 
+    }
+
+});
+
+
+var otherUsers = new Phaser.Class({
+
+    Extends: Phaser.GameObjects.Image,
+
+    initialize:
+
+        function User (scene)
+        {
+            Phaser.GameObjects.Image.call(this, scene, 0, 0, 'Enemy');
+            this.xSpeed = 5;
+            this.ySpeed = 5;
+            this.age = 0;
+        },
+
+    update: function () {
+        this.age += 1
+        if(this.age > 1){
+            this.destroy()
+        }
+        this.x += this.xSpeed;
+        this.y += this.ySpeed;
+    }
+
+})
+
+var Shot = new Phaser.Class({
+
+    Extends: Phaser.GameObjects.Image,
+
+    initialize:
+
+        function Shot (scene)
+        {
+            Phaser.GameObjects.Image.call(this, scene, 0, 0, 'Shot');
+            this.xSpeed = 0;
+            this.ySpeed = 0;
+            this.age = 0;
+        },
+
+    update: function () {
+        this.age += 1
+        if(this.age > 1){
+            this.destroy()
+        }
+        this.x += this.xSpeed;
+        this.y += this.ySpeed;
     }
 
 });

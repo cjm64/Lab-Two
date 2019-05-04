@@ -210,8 +210,21 @@ function create () {
 
 }
 
+
+
 function update(time, delta){
     var cam = this.cameras.main;
+
+
+    var tabKey = this.input.keyboard.addKey('TAB')
+    var scoreboard = document.getElementById('leaderboard');
+    if(tabKey.isDown){
+        scoreboard.style.display = "block"
+        console.log("q pressed")
+    } else {
+        scoreboard.style.display = "none"
+    }
+
 
     for(var i = 0; i < playerlist.length; i++){
         if(Math.abs(player.x - playerlist[i]["x"]) < 500 && Math.abs(player.y - playerlist[i]["y"]) < 500) {

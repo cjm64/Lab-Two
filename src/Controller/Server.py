@@ -9,7 +9,7 @@ eventlet.monkey_patch()
 app = Flask(__name__)
 socket_server = SocketIO(app)
 # model_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-# model_socket.connect(('localhost', 8000)) only if main is active
+# model_socket.connect(('localhost', 8000)) #only if main is active
 
 """
 def listen_to_model(the_socket):
@@ -50,7 +50,8 @@ def got_message(username, jason):
     usernameToSid[username] = request.sid
     sidToUsername[request.sid] = username
     delimiter = "~"
-    model_socket.sendall(json.dumps(jason + delimiter).encode())
+    data = {"action": "regular", "data": json.loads(jason)}
+    model_socket.sendall((json.dumps(data) + delimiter).encode())
 
 
 @socket_server.on('disconnect')
@@ -81,4 +82,4 @@ def got_message(jason):
     model_socket.sendall((json.dumps(data) + delimiter).encode())
 
 print("server at 8053")
-socket_server.run(app, port=8053)
+socket_server.run(app, port=8060)
