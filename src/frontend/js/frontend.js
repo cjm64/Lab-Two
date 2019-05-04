@@ -6,13 +6,25 @@ var name;
 var gameState;
 
 
+function test(){
+    var modal = document.getElementById('myModal');
+    var btn = document.getElementById("leaderboard");
+    name = document.getElementById('username');
+    modal.style.display = "none";
+    startGame()
+    /*if(isUsed(name)){
+        document.getElementById('choose').innerHTML = name + " is already taken"
+    }
+    else{
+        modal.style.display = "none";
+        socket.emit("register", name, JSON.stringify(jason))
+        startGame()
+    }*/
+}
+
 var socket = io.connect({transports: ['websocket']});
 socket.on('connect', function (event) {
-    name = prompt("Please Enter a Username", "Username");
-    while(isUsed(name)){
-        name = prompt("Please Enter Another Username", name);
-    };
-    socket.emit("register", name)
+    console.log('connected')
 });
 socket.on('message', function (event) {
     // received a message from the server
@@ -269,7 +281,7 @@ function update(time, delta){
     }
 
     if(jason !== lastJason){
-        socket.emit("Jason", json.stringify())
+        socket.emit("Jason", JSON.stringify(jason))
         lastJason = jason
     }
 

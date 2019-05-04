@@ -43,14 +43,28 @@ def asset(path):
 
 
 usernameToSid = {}
+sidToUsername = {}
 
 
 @socket_server.on('register')
-def got_message(username):
-    new_player = {"type": "New Player", "username": username}
-    print(username)
+def got_message(username, jason):
+    usernameToSid[username] = request.sid
+    sidToUsername[request.sid] = username
     delimiter = "~"
-    # model_socket.sendall(json.dumps(username + delimiter).encode())
+    model_socket.sendall(json.dumps(jason + delimiter).encode())
+
+
+@socket_server.on('disconnect')
+def got_connection():
+    if request.sid in sidToUsername:
+        username = sidToUsername[request.sid]
+        del sidToUsername[request.sid]
+        del usernameToSid[username]
+        delimiter = "~"
+        data = {"username": username, "action": "disconnect"}
+        model_socket.sendall((json.dumps(data) + delimiter).encode())
+
+
 
 # Possibly make each response individual for each button(ex. W,A,S,D, MouseClick) or all one response
 
@@ -63,8 +77,9 @@ def got_message(jason):
 @socket_server.on('Jason')
 def got_message(jason):
     print("message")
+    data = {"action": "regular", "data": json.loads(jason)}
     delimiter = "~"
-    #model_socket.sendall((json.dumps(jason) + delimiter).encode())
+    model_socket.sendall((json.dumps(data) + delimiter).encode())
 
 
 socket_server.run(app, port=8053)
