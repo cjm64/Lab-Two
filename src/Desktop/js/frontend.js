@@ -5,6 +5,22 @@ function startGame() {
 var name;
 var gameState;
 
+function test(){
+    var modal = document.getElementById('myModal');
+    var btn = document.getElementById("leaderboard");
+    name = document.getElementById('username');
+    modal.style.display = "none";
+    startGame()
+    /*if(isUsed(name)){
+        document.getElementById('choose').innerHTML = name + " is already taken"
+    }
+    else{
+        modal.style.display = "none";
+        socket.emit("register", name, JSON.stringify(jason))
+        startGame()
+    }*/
+}
+
 var WebSocketClient = require('websocket').client;
 
 var client = new WebSocketClient();
@@ -24,20 +40,13 @@ client.on('connect', function(connection) {
     connection.on('message', function(message) {
         if (message.type === 'utf8') {
             console.log("Received: '" + message.utf8Data + "'");
+            gameState = message.parse()
         }
     });
 
-    function sendNumber() {
-        if (connection.connected) {
-            var number = Math.round(Math.random() * 0xFFFFFF);
-            connection.sendUTF(number.toString());
-            setTimeout(sendNumber, 1000);
-        }
-    }
-    sendNumber();
 });
 
-client.connect('ws://localhost:8081/', 'echo-protocol');
+client.connect('ws://localhost:8081/');
 
 
 
@@ -253,7 +262,7 @@ function update(time, delta){
     }
 
     if(jason !== lastJason){
-        socket.emit("Jason", json.stringify())
+        client.send("Jason", json.stringify())
         lastJason = jason
     }
 

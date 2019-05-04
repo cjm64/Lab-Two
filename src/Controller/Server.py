@@ -28,7 +28,6 @@ Thread(target=listen_to_model, args=(model_socket,)).start()"""
 
 @app.route('/')
 def index():
-    print("here")
     return send_from_directory('../frontend', 'web.html')
 
 
@@ -81,5 +80,5 @@ def got_message(jason):
     delimiter = "~"
     model_socket.sendall((json.dumps(data) + delimiter).encode())
 
-
+print("server at 8053")
 socket_server.run(app, port=8053)

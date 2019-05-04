@@ -5,6 +5,14 @@ function startGame() {
 var name;
 var gameState;
 
+function isUsed(name){
+    gameState["Playerdata"].foreach(function(na){
+        if(na["Name"] == name){
+            return true
+        }
+    })
+    return false
+}
 
 function test(){
     var modal = document.getElementById('myModal');
