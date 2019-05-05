@@ -152,7 +152,6 @@ function create () {
             var bullet = Shots.get().setActive(true).setVisible(true)
             bullet.shoot(player, pointer)
             jason["angle"] = bullet.angle
-            this.enemies.clear(true)
         }
     }, this); //Sets the angle of the player's projectile when the mouse is clicked.
 
