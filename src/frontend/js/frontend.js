@@ -4,37 +4,56 @@ function startGame() {
 
 var name;
 var gameState;
+var initializedObject;
 
 function isUsed(name){
-    gameState["Playerdata"].foreach(function(na){
-        if(na["Name"] == name){
-            return true
+    if(gameState["Playerdata"] != undefined){
+        for(var y = 0; y < gameState["Playerdata"].length; y++){
+            //console.log("compare: " + gameState["Playerdata"][y]["Name"] + " and "+ name)
+            if(gameState["Playerdata"][y]["Name"] == name){
+                return true
+            }
         }
-    })
+        return false
+    }
     return false
+
 }
 
-function ne(){
-    console.log("test")
-}
+gameState = {"Playerdata":[{
+        "Name":"test",
+        "x": 350,
+        "y": 350,
+        "Kills":2,
+        "Projectile":[]
+    }]}
 
-function booting(){
+
+function MyButton(){
     var control = document.getElementById('controls');
     var modal = document.getElementById('myModal');
     name = document.getElementById('username').value;
-    jason["name"] = name
-    modal.style.display = "none";
-    control.style.display = "block";
-    startGame()
-
-    /*if(isUsed(name)){
-        document.getElementById('choose').innerHTML = name + " is already taken"
+    console.log(name)
+    console.log(gameState)
+    if(isUsed(name)){
+        document.getElementById('choose').innerHTML = name + " is already taken<br />"
     }
     else{
+        jason["name"] = name
         modal.style.display = "none";
-        socket.emit("register", name, JSON.stringify(jason))
+        initializedObject = {
+                "Name" : name,
+                "x" : 400,
+                "y" : 400,
+                "Kills" : 0,
+                "Projectile" : []
+            }
+
+        gameState["Playerdata"].push(initializedObject)
         startGame()
-    }*/
+        control.style.display = "block";
+        socket.emit("register", name, JSON.stringify(jason))
+    }
 }
 
 var socket = io.connect({transports: ['websocket']});
@@ -43,9 +62,17 @@ socket.on('connect', function (event) {
 });
 socket.on('message', function (event) {
     // received a message from the server
-    console.log("websocket")
     console.log(event);
-    gameState = event.parse()
+    message = JSON.parse(event)
+    if(message["type"] == "register"){
+        console.log(message["data"])
+    }
+    else if(message["type"] == "game"){
+        gameState = message["data"]
+    }
+    else{
+        console.log("unknown data type")
+    }
 });
 
 var jason = {
@@ -59,16 +86,6 @@ var lastJason = jason;
 
 var parsedbtf = {}
 var listofplayers = []
-
-var initializedObject = JSON.stringify({"playerdata" : [{
-        "Name" : name,
-        "x" : 400,
-        "y" : 400,
-        "Kills" : 0,
-        "Projectile" : []
-    }]})
-
-gameState = initializedObject
 
 var config = {
     "type" : Phaser.AUTO,
@@ -143,7 +160,6 @@ function create () {
             var bullet = Shots.get().setActive(true).setVisible(true)
             bullet.shoot(player, pointer)
             jason["angle"] = bullet.angle
-            this.enemies.clear(true)
         }
     }, this); //Sets the angle of the player's projectile when the mouse is clicked.
 
@@ -170,8 +186,8 @@ function update(time, delta){
         scoreboard.style.display = "none"
     }
 
-    parsedbtf = JSON.parse(gameState)
-    listofplayers = parsedbtf["playerdata"]
+    parsedbtf = gameState
+    listofplayers = parsedbtf["Playerdata"]
     top_kill = 0
     top_player = "you"
     for(var i = 0; i < listofplayers.length; i++){
@@ -239,12 +255,12 @@ function update(time, delta){
         jason['horizontal'] = 0;
     }
 
-    socket.emit("Jason", JSON.stringify(jason))
-    lastJason = jason
+    socket.emit("Jason", JSON.stringify(jason));
+    lastJason = jason;
 
     jason["angle"] = 100
 
-    fire +=1
+    fire +=1;
     return;
 }
 
