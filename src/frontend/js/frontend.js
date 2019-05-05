@@ -8,9 +8,8 @@ var initializedObject;
 
 function isUsed(name){
     if(gameState["Playerdata"] != undefined){
-        console.log("defined")
         for(var y = 0; y < gameState["Playerdata"].length; y++){
-            console.log("compare: " + gameState["Playerdata"][y]["Name"] + " and "+ name)
+            //console.log("compare: " + gameState["Playerdata"][y]["Name"] + " and "+ name)
             if(gameState["Playerdata"][y]["Name"] == name){
                 return true
             }
@@ -64,14 +63,23 @@ socket.on('connect', function (event) {
 socket.on('message', function (event) {
     // received a message from the server
     console.log(event);
-    gameState = event.parse()
+    message = JSON.parse(event)
+    if(message["type"] == "register"){
+        console.log(message["data"])
+    }
+    else if(message["type"] == "game"){
+        gameState = message["data"]
+    }
+    else{
+        console.log("unknown data type")
+    }
 });
 
 var jason = {
     'name' : name,
     'vertical' : 0,
     'horizontal' : 0,
-    'angle': 0
+    'angle': 100
 }
 
 var lastJason = jason;
@@ -250,7 +258,7 @@ function update(time, delta){
     socket.emit("Jason", JSON.stringify(jason));
     lastJason = jason;
 
-    jason["angle"] = null;
+    jason["angle"] = 100;
 
     fire +=1;
     return;
