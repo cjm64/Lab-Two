@@ -1,18 +1,40 @@
-<html>
+<html xmlns="http://www.w3.org/1999/html">
 <head align="center">
     <title>Epic Victory Royale</title>
     <script src="https://cdn.jsdelivr.net/npm/phaser@3.15.1/dist/phaser-arcade-physics.min.js"></script>
     <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/2.2.0/socket.io.js"></script>
-    <script src="js/frontend.js"></script>
+    <script src="frontend.js"></script>
     <style>
         body {
             background-color: linen;
+            font-family: Helvetica;
+
+        }
+        .modal {
+            display: block; /* Hidden by default */
+            position: fixed; /* Stay in place */
+            z-index: 1; /* Sit on top */
+            left: 0;
+            top: 0;
+            width: 100%; /* Full width */
+            height: 100%; /* Full height */
+            overflow: hidden; /* Enable scroll if needed */
+            background-color: rgb(0,0,0); /* Fallback color */
+            background-color: rgba(0,0,0,0.4); /* Black w/ opacity */
+        }
+        .modal-content {
+            background-color: #fefefe;
+            margin: 15% auto; /* 15% from the top and centered */
+            padding: 20px;
+            border: 1px solid #888;
+            width: 80%; /* Could be more or less, depending on screen size */
         }
         #controls {
-            top: 20px;
-            left: 20px;
-            width: 150px;
-            height: 80%;
+            display: none;
+            bottom: 0px;
+            left: 10%;
+            width: 80%;
+            height: 60px;
             background-color: lightblue;
             z-index: 1;
             position: fixed;
@@ -20,38 +42,84 @@
         .text {
             text-align: center;
         }
+        .center-div
+        {
+            margin: 0 auto;
+            width: 800px;
+        }
         #leaderboard {
-            top: 20px;
-            right: 20px;
-            width: 150px;
-            height: 80%;
-            background-color: lightblue;
+            display: none;
+            top: 8px;
+            height: 800px;
+            width:800px;
+            background: rgb(204, 204, 204);
+            background: rgba(204, 204, 204, 0.75);
             z-index: 1;
+            background-position: center;
             position: fixed;
+        }
+        table{
+            width: 100%;
+            text-align: center;
+        }
+        td{
+            width: 20%;
+        }
+        th{
+            height: 30px;
         }
     </style>
 </head>
-<body align="center" onload="startGame();">
-
-<div align="center" id="game"></div>
-<div id="leaderboard">
-    <h3>Top Players:</h3>
-    <div class="text" id="score"></div>
-    <br />
-    <br />
-    <h3>Your Stats:</h3>
-    <div class="text" id="myscore">
-
-    </div>
-</div>
-<div id="controls">
-    <div class="text">
+<body align="center">
+<div id="myModal" class="modal">
+    <div class="modal-content">
+        <h1>Epic Victory Royale</h1>
+        <h2>Pick a username</h2>
+        <span id="choose"></span>
+        Username: <input type="text" id="username">
+        <input type="button" value="Submit" onclick = "booting()">
+        <br />
         <h3>Controls:</h3>
         <h4>Up: W</h4>
         <h4>Down: S</h4>
         <h4>Left: A</h4>
         <h4>Right: D</h4>
+        <h4>Scoreboard: TAB</h4>
     </div>
+</div>
+
+<div align="center" id="game"></div>
+<div class="center-div">
+    <div id="leaderboard">
+        <h3>Top Players:</h3>
+        <div class="text" id="score"></div>
+        <br />
+        <br />
+        <h3>Your Stats:</h3>
+        <div class="text" id="myscore">
+
+        </div>
+    </div>
+</div>
+
+<div id="controls">
+    <table>
+        <tr>
+            <th></th>
+            <th></th>
+            <th>Controls</th>
+            <th></th>
+            <th></th>
+        </tr>
+        <tr>
+            <td>Up: W</td>
+            <td>Down: S</td>
+            <td>Left: A</td>
+            <td>Right: D</td>
+            <td>Scoreboard: TAB</td>
+        </tr>
+
+    </table>
 </div>
 
 </body>
