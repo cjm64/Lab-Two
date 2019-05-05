@@ -14,7 +14,11 @@ function isUsed(name){
     return false
 }
 
-function test(){
+function ne(){
+    console.log("test")
+}
+
+function booting(){
     var control = document.getElementById('controls');
     var modal = document.getElementById('myModal');
     name = document.getElementById('username');
@@ -34,11 +38,7 @@ function test(){
 
 var socket = io.connect({transports: ['websocket']});
 socket.on('connect', function (event) {
-    name = prompt("Please Enter a Username", "Username");
-    while(isUsed(name)){
-        name = prompt("Please Enter Another Username", name);
-    };
-    socket.emit("register", name)
+    console.log("connected")
 });
 socket.on('message', function (event) {
     // received a message from the server
@@ -170,12 +170,17 @@ function update(time, delta){
 
     parsedbtf = JSON.parse(gameState)
     listofplayers = parsedbtf["playerdata"]
-
+    top_kill = 0
+    top_player = "you"
     for(var i = 0; i < listofplayers.length; i++){
-
+        if(listofplayers[i]["Kills"] > top_kill){
+            top_kill = listofplayers[i]["Kills"]
+            top_player = listofplayers[i]["Name"]
+        }
         if(listofplayers[i]["Name"] == name){
             player.x = listofplayers[i]["x"]
             player.y = listofplayers[i]["y"]
+            document.getElementById("myscore").value = listofplayers[i]["Kills"]
             for(var q = 0; q < listofplayers[i]["Projectile"].length; q++){
                 var mb = Shots.get().setActive(true).setVisible(true);
                 mb.x = listofplayers[i]["Projectile"][q]["x"]
@@ -197,6 +202,8 @@ function update(time, delta){
             }
         }
     }
+    document.getElementById("score").value = top_player + ": " + top_kill.toString()
+
 
     var cursors = this.input.keyboard.addKeys(
         {up: Phaser.Input.Keyboard.KeyCodes.W,

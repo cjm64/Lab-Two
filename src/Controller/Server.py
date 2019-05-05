@@ -82,6 +82,6 @@ def got_message(jason):
     model_socket.sendall((json.dumps(data) + delimiter).encode())
 
 
-app_port = 8065
+app_port = 8069
 print("server at localhost:" + str(app_port))
 socket_server.run(app, port=app_port)
