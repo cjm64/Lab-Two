@@ -15,11 +15,13 @@ function isUsed(name){
 }
 
 function test(){
+    var control = document.getElementById('controls');
     var modal = document.getElementById('myModal');
-    var btn = document.getElementById("leaderboard");
     name = document.getElementById('username');
     modal.style.display = "none";
+    control.style.display = "block";
     startGame()
+
     /*if(isUsed(name)){
         document.getElementById('choose').innerHTML = name + " is already taken"
     }

@@ -81,5 +81,7 @@ def got_message(jason):
     delimiter = "~"
     model_socket.sendall((json.dumps(data) + delimiter).encode())
 
-print("server at 8053")
-socket_server.run(app, port=8060)
+
+app_port = 8065
+print("server at localhost:" + str(app_port))
+socket_server.run(app, port=app_port)
