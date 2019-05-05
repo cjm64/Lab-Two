@@ -21,7 +21,8 @@ function ne(){
 function booting(){
     var control = document.getElementById('controls');
     var modal = document.getElementById('myModal');
-    name = document.getElementById('username');
+    name = document.getElementById('username').value;
+    jason["name"] = name
     modal.style.display = "none";
     control.style.display = "block";
     startGame()
@@ -42,6 +43,7 @@ socket.on('connect', function (event) {
 });
 socket.on('message', function (event) {
     // received a message from the server
+    console.log("websocket")
     console.log(event);
     gameState = event.parse()
 });
@@ -50,7 +52,7 @@ var jason = {
     'name' : name,
     'vertical' : 0,
     'horizontal' : 0,
-    'angle': 0
+    'angle': 100
 }
 
 var lastJason = jason;
@@ -237,10 +239,10 @@ function update(time, delta){
         jason['horizontal'] = 0;
     }
 
-    socket.emit("Jason", JSON.stringify())
+    socket.emit("Jason", JSON.stringify(jason))
     lastJason = jason
 
-    jason["angle"] = null
+    jason["angle"] = 100
 
     fire +=1
     return;

@@ -32,23 +32,24 @@ class TcpToPy(theGameActor: ActorRef) extends Actor{
   IO(Tcp) ! Bind(self, new InetSocketAddress("localhost", 8000))
 
   // var clients: Set[ActorRef] = Set()
-  var theServer: ActorRef = _
+  var theServer: Set[ActorRef] = Set()
   var theBuffer: String = ""
   var theDelimiter: String = "~"
 
 
   override def receive: Receive = {
-    // case b: Bound => println("Listening on port: " + b.localAddress.getPort)
+    case b: Bound => println("Listening on port: " + b.localAddress.getPort)
     case c: Connected =>
       println("Client Connected: " + c.remoteAddress)
       // this will be solely for the server
       // this.clients = this.clients + sender()
-      this.theServer = sender()
-      this.theServer ! Register(self) // this establishes the connection
+      this.theServer += sender()
+      sender() ! Register(self) // this establishes the connection
+      theGameActor ! foundTheServer
     case PeerClosed =>
       println("Client Disconnected: " + sender())
-      // this.clients = this.clients - sender()
-      this.theServer = _
+      this.theServer = this.theServer - sender()
+      // this.theServer = _
     case r: Received =>
       // println("Received: " + r.data.utf8String)
       // this will be a json with input
@@ -67,7 +68,7 @@ class TcpToPy(theGameActor: ActorRef) extends Actor{
         }else if(theAction == "regular"){
           val regularParsed: Map[String, JsValue] = (parsed \ "data").as[Map[String, JsValue]]
           val theRegularJSON: String = Json.stringify(Json.toJson(regularParsed))
-          theGameActor ! giveJSON(jsonMessage)
+          theGameActor ! giveJSON(theRegularJSON)
         }
 
         // theGameActor ! giveJSON(jsonMessage)
@@ -77,14 +78,15 @@ class TcpToPy(theGameActor: ActorRef) extends Actor{
       }
 
 
-    case giveNewJSON =>
-      theGameActor ! giveNewJSON
+    case `giNewJSON` => theGameActor ! giveNewJSON
+      // println("Sending giveNewJSON to gameActor")
+    //   theGameActor ! askBackForJSON
 
 
     case send: SendJSON =>
-      // println("Sending: " + send.message)
-      // this.clients.foreach((client: ActorRef) => client ! Write(ByteString(send.message)))
-      this.theServer ! Write(ByteString(send.message+theDelimiter))
+      println("Sending: " + send.message)
+      this.theServer.foreach((client: ActorRef) => client ! Write(ByteString(send.message+theDelimiter)))
+      // this.theServer ! Write(ByteString(send.message+theDelimiter))
     // the py server is sent the json message
   }
 
@@ -92,6 +94,7 @@ class TcpToPy(theGameActor: ActorRef) extends Actor{
 object TcpToPy {
 
   def main(args: Array[String]): Unit = {
+    setTable()
 
     val actorSystem = ActorSystem()
 
@@ -104,7 +107,7 @@ object TcpToPy {
 
 
     actorSystem.scheduler.schedule(16.milliseconds, 32.milliseconds, theGameActor, Update)  // Tells gameActor to update itself
-    actorSystem.scheduler.schedule(32.milliseconds, 32.milliseconds, server, giveNewJSON) // Tells tcp to send the json
+    actorSystem.scheduler.schedule(32.milliseconds, 32.milliseconds, server, giNewJSON) // Tells tcp to send the json
   }
 
 }

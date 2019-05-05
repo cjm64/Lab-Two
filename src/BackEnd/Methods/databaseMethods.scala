@@ -35,33 +35,41 @@ object databaseMethods {
     //statement.execute("DROP TABLE IF EXISTS players")
     //statement.execute("CREATE TABLE players (username TEXT, points INT, locationX DOUBLE, locationY Double)")
 
+    statement.execute("DROP TABLE IF EXISTS Player")
+    statement.execute("DROP TABLE IF EXISTS Projectiles")
     // Use in real app to avoid deleting your table
-    statement.execute("CREATE TABLE IF NOT EXISTS Players (name TEXT, x DOUBLE, y DOUBLE, kills INT, deaths INT, angle DOUBLE, lastUpdate Long)")
-    statement.execute("CREATE TABLE IF NOT EXISTS Projectiles (user TEXT, id INT, x DOUBLE, y DOUBLE, lastUpdate Long, lifetime Long)")
+    statement.execute("CREATE TABLE IF NOT EXISTS Projectiles (user TEXT, id INT, x DOUBLE, y DOUBLE, lastUpdate Long, lifetime Double)")
+    statement.execute("CREATE TABLE IF NOT EXISTS Player (x DOUBLE, y DOUBLE, kills INT, deaths INT, lastUpdate Long, theName TEXT)")
+    // statement.execute("CREATE TABLE IF NOT EXISTS Projectiles (user TEXT, id INT, x DOUBLE, y DOUBLE, lastUpdate Long, lifetime Long)")
   }
 
+
   def playerExists(name: String): Boolean = {
-    val statement = connection.prepareStatement("SELECT * FROM Players WHERE name=?")
+    val statement = connection.prepareStatement("SELECT * FROM Player WHERE theName=?")
+    // val statement = connection.prepareStatement("SELECT * FROM Players")
     statement.setString(1, name)
     val result: ResultSet = statement.executeQuery()
+    // println(result)
     result.next()
+    // result.getString("name")
   }
 
 
   def makePlayer(name: String): Unit = {
-    val statement = connection.prepareStatement("INSERT INTO Players VALUE (?, ?, ?, ?, ?, ?)")
-    statement.setString(1, name) // name
-    statement.setDouble(2, math.random()*800)  // x
-    statement.setDouble(3, math.random()*800)  // y
-    statement.setInt(4, 0)       // kills
-    statement.setInt(5, 0)       // deaths
+    val statement = connection.prepareStatement("INSERT INTO Player VALUE (?, ?, ?, ?, ?, ?)")
+    // statement.setString(1, name) // name
+    statement.setDouble(1, math.random()*800)  // x
+    statement.setDouble(2, math.random()*800)  // y
+    statement.setInt(3, 0)       // kills
+    statement.setInt(4, 0)       // deaths
     // statement.setDouble(6, null)  // angle  // I DON'T THINK PLAYERS WILL FIRE THE SECOND THEY SPAWN IN THE GAME
-    statement.setLong(6, System.nanoTime())
+    statement.setLong(5, System.nanoTime())
+    statement.setString(6, name)
     statement.execute()
   }
 
   def makeProjectile(name: String, angle: Double): Int = { // it only returns an int so that gameActor can send new projectiles
-    var statement = connection.prepareStatement("SELECT * FROM Players WHERE name=?")
+    var statement = connection.prepareStatement("SELECT * FROM Player WHERE theName=?")
     statement.setString(1, name)
     val result: ResultSet = statement.executeQuery()
     result.next()
@@ -76,7 +84,7 @@ object databaseMethods {
     statement.setDouble(4, y)
     statement.setDouble(5, angle)
     statement.setLong(6, System.nanoTime())
-    statement.setLong(7, (0.0).toLong)
+    statement.setDouble(7, 0.0)
     statement.execute()
     id+=1
     id
@@ -85,9 +93,9 @@ object databaseMethods {
 
 
   def updatePlayerPos(name: String, vert: Int, horiz: Int): Unit = {
-    val speed: Double = 50.0 // 50 px / second
+    val speed: Double = 5.0 // 50 px / second
 
-    var statement = connection.prepareStatement("SELECT * FROM Players WHERE name=?")
+    var statement = connection.prepareStatement("SELECT * FROM Player WHERE theName=?")
     statement.setString(1, name)
     val result: ResultSet = statement.executeQuery()
     result.next()
@@ -96,10 +104,10 @@ object databaseMethods {
     val time: Long = result.getLong("lastUpdate")
     val deltaS = (System.nanoTime() - time) / 1000000000.0
 
-    statement = connection.prepareStatement("UPDATE Players SET x=?, y=?, lastUpdate=? WHERE name=?")
+    statement = connection.prepareStatement("UPDATE Player SET x=?, y=?, lastUpdate=? WHERE theName=?")
     statement.setDouble(1, x+(horiz*speed*deltaS))
     statement.setDouble(2, y+(vert*speed*deltaS))
-    statement.setLong(3, time)
+    statement.setLong(3, System.nanoTime())
     statement.setString(4, name)
 
     statement.execute()
@@ -107,7 +115,7 @@ object databaseMethods {
 
 
   def updateProjectilePos(id: Int): Unit = {
-    val speed: Double = 60.0 // 60 px / second
+    val speed: Double = 3.0 // 60 px / second
 
     var statement = connection.prepareStatement("SELECT * FROM Projectiles WHERE id=?")
     statement.setInt(1, id)
@@ -136,13 +144,13 @@ object databaseMethods {
   def collision(name: String, id: Int): Unit ={
     // reset position of name
     // increment deaths of name
-    var statement = connection.prepareStatement("SELECT * FROM Players WHERE name=?")
+    var statement = connection.prepareStatement("SELECT * FROM Player WHERE theName=?")
     statement.setString(1, name)
     val result: ResultSet = statement.executeQuery()
     result.next()
     val deaths: Int = result.getInt("deaths")
 
-    statement = connection.prepareStatement("UPDATE Players SET x=?, y=?, deaths=? WHERE name=?")
+    statement = connection.prepareStatement("UPDATE Player SET x=?, y=?, deaths=? WHERE theName=?")
     statement.setDouble(1, math.random()*800)
     statement.setDouble(2, math.random()*800)
     statement.setInt(3, deaths+1)
@@ -162,13 +170,13 @@ object databaseMethods {
     statement.setInt(1, id)
     statement.execute()
 
-    statement = connection.prepareStatement("SELECT * FROM Players WHERE name=?")
+    statement = connection.prepareStatement("SELECT * FROM Player WHERE theName=?")
     statement.setString(1, user)
     val resultThree: ResultSet = statement.executeQuery()
     resultThree.next()
     val kills: Int = resultThree.getInt("kills")
 
-    statement = connection.prepareStatement("UPDATE Players SET kills=? WHERE name=?")
+    statement = connection.prepareStatement("UPDATE Player SET kills=? WHERE theName=?")
     statement.setInt(1, kills+1)
     statement.setString(2, user)
     statement.execute()
@@ -179,24 +187,27 @@ object databaseMethods {
     var theMap: Map[Int, String] = Map()
     val playerRadius: Double = 16.0
     // for each projectile, check each player to see if it is within it's size
-    val projectiles: ResultSet = connection.prepareStatement("SELECT * FROM Projectiles").executeQuery()
-    val players: ResultSet = connection.prepareStatement("SELECT * FROM Players").executeQuery()
+    val projectiles: ResultSet = connection.createStatement().executeQuery("SELECT * FROM Projectiles")
+    val players: ResultSet = connection.createStatement().executeQuery("SELECT * FROM Player")
 
-    val projectileMap: Map[Int, List[String]] = Map()
+    var projectileMap: Map[Int, List[String]] = Map()
     while(projectiles.next()) {
       val projUser: String = projectiles.getString("user")
       val projX: String = projectiles.getDouble("x").toString
       val projY: String = projectiles.getDouble("y").toString
       val id: Int = projectiles.getInt("id")
-      projectileMap(id) -> List(projX, projY, projUser)
+      // projectileMap(id) -> List(projX, projY, projUser)
+      projectileMap += id -> List(projX, projY, projUser)
+
     }
 
-    val playerMap: Map[String, List[Double]] = Map()
+    var playerMap: Map[String, List[Double]] = Map()
     while(players.next()){
       val x: Double = players.getDouble("x")
       val y: Double = players.getDouble("y")
-      val theName: String = players.getString("name")
-      playerMap(theName) -> List(x, y)
+      val theName: String = players.getString("theName")
+      // playerMap(theName) = List(x, y)
+      playerMap += theName->List(x, y)
     }
 
     for (projKey <- projectileMap.keys){
@@ -206,7 +217,8 @@ object databaseMethods {
         val ySquared: Double = math.pow(projectileMap(projKey)(1).toDouble - playerMap(playKey)(1), 2)
         val d: Double = math.pow(xSquared + ySquared, 0.5)
         if (d < playerRadius && playKey != projectileMap(projKey)(3)){
-          theMap(projKey) -> playKey
+          // theMap(projKey) = playKey
+          theMap += projKey -> playKey
         }
       }
     }
@@ -215,7 +227,7 @@ object databaseMethods {
 
   def deletePlayer(name: String): Unit = {
     // delete player from the table
-    var statement = connection.prepareStatement("DELETE FROM Players WHERE name=?")
+    var statement = connection.prepareStatement("DELETE FROM Player WHERE theName=?")
     statement.setString(1, name)
     statement.execute()
 
@@ -228,7 +240,7 @@ object databaseMethods {
 
   def CheckOutOfBounds(name: String): Unit = {
     val worldSize: Double = 800.0
-    val statement = connection.prepareStatement("SELECT * FROM Players WHERE name=?")
+    val statement = connection.prepareStatement("SELECT * FROM Player WHERE theName=?")
     statement.setString(1, name)
     val result: ResultSet = statement.executeQuery()
     result.next()
@@ -236,23 +248,23 @@ object databaseMethods {
     val playerY: Double = result.getDouble("y")
     if(playerX > worldSize){
       // if player is beyond 800
-      val theStatement = connection.prepareStatement("UPDATE Players SET x=? WHERE name=?")
+      val theStatement = connection.prepareStatement("UPDATE Player SET x=? WHERE theName=?")
       theStatement.setDouble(1, worldSize)
       theStatement.setString(2, name)
       statement.execute()
     }else if(playerX < worldSize){
-      val theStatement = connection.prepareStatement("UPDATE Players SET x=? WHERE name=?")
+      val theStatement = connection.prepareStatement("UPDATE Player SET x=? WHERE theName=?")
       theStatement.setDouble(1, 0.0)
       theStatement.setString(2, name)
       statement.execute()
     }
     if(playerY > worldSize){
-      val theStatement = connection.prepareStatement("UPDATE Players SET y=? WHERE name=?")
+      val theStatement = connection.prepareStatement("UPDATE Player SET y=? WHERE theName=?")
       theStatement.setDouble(1, worldSize)
       theStatement.setString(2, name)
       statement.execute()
     }else if(playerY < worldSize){
-      val theStatement = connection.prepareStatement("UPDATE Players SET y=? WHERE name=?")
+      val theStatement = connection.prepareStatement("UPDATE Player SET y=? WHERE theName=?")
       theStatement.setDouble(1, 0.0)
       theStatement.setString(2, name)
       statement.execute()
@@ -295,9 +307,9 @@ object databaseMethods {
     // fix this to add projectiles and whatnot
     var theList: List[Map[String, String]] = List()
     // var theMap: Map[String, String] = Map()
-    val result: ResultSet = connection.prepareStatement("SELECT * FROM Players").executeQuery()
+    val result: ResultSet = connection.createStatement().executeQuery("SELECT * FROM Player")
     while (result.next()){
-      val name: String = result.getString("name")
+      val name: String = result.getString("theName")
       val x: String = result.getDouble("x").toString
       val y: String = result.getDouble("y").toString
       val kills: String = result.getInt("kills").toString

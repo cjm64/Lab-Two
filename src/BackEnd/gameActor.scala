@@ -4,20 +4,24 @@ import play.api.libs.json.{JsValue, Json}
 import java.sql.{Connection, DriverManager, ResultSet}
 import akka.actor.{Actor, ActorRef, Props}
 import BackEnd.Methods.databaseMethods._
+import theGame._
 
 class gameActor extends Actor{
 
 
-  var newProjectiles: List[Int] = List()
-
+  // var newProjectiles: List[Int] = List()
+  // var foundServer: Boolean = false
 
   def useJSON(jsonString: String): Unit = {
 
     val parsed: JsValue = Json.parse(jsonString)
 
-    val name: String = (parsed \ "name").as[String]        // this tell us which sprite to update and what sprite to fire from
+    val name: String = (parsed \ "name").as[String] // this tell us which sprite to update and what sprite to fire from
+    println(name)
     val vertical: Int = (parsed \ "vertical").as[Int]      // 0 - nothing, -1 - down, 1 - up
+    println(vertical)
     val horizontal: Int = (parsed \ "horizontal").as[Int]  // 0 - nothing, -1 - left, 1 - right
+    println(horizontal)
     val angle: Double = (parsed \ "angle").as[Double]      // if this is not null, do something with it
 
 
@@ -42,7 +46,7 @@ class gameActor extends Actor{
     // I also think that think could be done in update Objects
 
 
-    if (angle != null){
+    if (angle != 100.0){
       // yes, we make a new projectile, but dont add that to new projectiles
       // we just send all of the projectiles at the end, in make json and whatnot
       makeProjectile(name, angle)
@@ -73,49 +77,62 @@ class gameActor extends Actor{
 
     // FIX THIS
     // how do we get all of the new projectiles to send? UPDATE, I did it
-    val playerMapping: List[Map[String, String]] = getAllPlayers()
-    var someList: List[Map[String, JsValue]] = List()
-    for (map <- playerMapping){
+    if (theGame.foundTheServer){
+      val playerMapping: List[Map[String, String]] = getAllPlayers()
+      var someList: List[Map[String, JsValue]] = List()
+      for (map <- playerMapping){
 
-      val projMap: List[Map[String, Double]] = getPlayerProjectiles(map("Name"))
-      someList = someList:+Map(
-        "Name" -> Json.toJson(map("Name")),
-        "Kills" -> Json.toJson(map("Kills")),
-        // "Deaths" -> Json.toJson(map("Deaths")),
-        "x" -> Json.toJson(map("x")),
-        "y" -> Json.toJson(map("y")),
-        "Projectile" -> Json.toJson(projMap)
-      )
+        val projMap: List[Map[String, Double]] = getPlayerProjectiles(map("Name"))
+        someList = someList:+Map(
+          "Name" -> Json.toJson(map("Name")),
+          "Kills" -> Json.toJson(map("Kills")),
+          // "Deaths" -> Json.toJson(map("Deaths")),
+          "x" -> Json.toJson(map("x")),
+          "y" -> Json.toJson(map("y")),
+          "Projectile" -> Json.toJson(projMap)
+        )
+      }
+      // println("foundServer: true")
+      val theJSON: String = Json.stringify(Json.toJson(Map("PlayerData" -> someList)))
+      println(theJSON)
+      theJSON
+    }else{
+      // println("foundServer: false")
+      "MakeJSON(): found server is false"
     }
-    Json.stringify(Json.toJson(Map("PlayerData" -> someList)))
+
   }
 
 
   def updateObjects(): Unit = {
 
     // update projectiles
-    val result: ResultSet = connection.prepareStatement("SELECT * FROM Projectiles").executeQuery()
-    while(result.next()){
-      val theID: Int = result.getInt("id")
-      updateProjectilePos(theID)
-      checkLifeTime(theID)
+    if(theGame.foundTheServer){
+      val result: ResultSet = connection.createStatement().executeQuery("SELECT * FROM Projectiles")
+      while(result.next()){
+        val theID: Int = result.getInt("id")
+        updateProjectilePos(theID)
+        checkLifeTime(theID)
+      }
+
+      // update players
+      // this is based on user input though, so, we should leave this to the useJSON method
+      // val resultTwo: ResultSet = connection.prepareStatement("SELECT * FROM Players").executeQuery()
+
+      // check collision
+      val PlayersToIDs: Map[Int, String] = checkCollision()
+      for (id <- PlayersToIDs.keys){
+        collision(PlayersToIDs(id), id) // do collision
+      }
+
+      val resultTwo: ResultSet = connection.createStatement().executeQuery("SELECT * FROM Player")
+      while(resultTwo.next()){
+        CheckOutOfBounds(resultTwo.getString("theName"))
+      }
+
+    }else{
+
     }
-
-
-    // update players
-    // this is based on user input though, so, we should leave this to the useJSON method
-    // val resultTwo: ResultSet = connection.prepareStatement("SELECT * FROM Players").executeQuery()
-
-    // check collision
-    val PlayersToIDs: Map[Int, String] = checkCollision()
-    for (id <- PlayersToIDs.keys){
-      collision(PlayersToIDs(id), id) // do collision
-    }
-
-    // check boundaries
-    // or just do that in useJSON...
-
-    // check projectile lifetime
 
   }
 
@@ -127,9 +144,10 @@ class gameActor extends Actor{
 
     case message: giveJSON => useJSON(message.theJSON)
     case message: disconnectUser => deletePlayer(message.user)
-    case giveNewJSON => sender() ! SendJSON(makeJSON())
+    // case `askBackForJSON` =>
+    case `giveNewJSON` => sender() ! SendJSON(makeJSON())
     case Update => updateObjects()
-
+    case `foundTheServer` => theGame.setToTrue()
 
 
 
