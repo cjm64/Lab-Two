@@ -20,7 +20,7 @@ def listen_to_model(the_socket):
         while delimiter in buffer:
             message = buffer[:buffer.find(delimiter)]
             buffer = buffer[buffer.find(delimiter)+1:]
-            socket_server.emit('message', message)
+            socket_server.emit('message', message, broadcast=True)
 
 
 Thread(target=listen_to_model, args=(model_socket,)).start()"""
@@ -51,6 +51,7 @@ def got_message(username, jason):
     sidToUsername[request.sid] = username
     delimiter = "~"
     data = {"action": "regular", "data": json.loads(jason)}
+    socket_server.send('register', "registered")
     model_socket.sendall((json.dumps(data) + delimiter).encode())
 
 
@@ -69,7 +70,7 @@ def got_connection():
 # Possibly make each response individual for each button(ex. W,A,S,D, MouseClick) or all one response
 
 
-""""@socket_server.on('projectile')
+"""@socket_server.on('projectile')
 def got_message(jason):
     model_socket.sendall(json.dumps(jason).encode())"""
 
@@ -77,11 +78,12 @@ def got_message(jason):
 @socket_server.on('Jason')
 def got_message(jason):
     print("message")
+    print(jason)
     data = {"action": "regular", "data": json.loads(jason)}
     delimiter = "~"
     model_socket.sendall((json.dumps(data) + delimiter).encode())
 
 
-app_port = 8069
+app_port = 8019
 print("server at localhost:" + str(app_port))
 socket_server.run(app, port=app_port)
