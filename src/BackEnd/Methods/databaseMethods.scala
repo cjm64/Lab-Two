@@ -2,12 +2,12 @@ package BackEnd.Methods
 
 import java.sql.{Connection, DriverManager, ResultSet}
 
-import BackEnd.Methods.password._
+import BackEnd.Methods.password.word
 
 object databaseMethods {
   val url = "jdbc:mysql://localhost/mysql?serverTimezone=UTC"
   val username = "root"
-  val pass: String = password.word
+  val pass: String = word
 
   var connection: Connection = DriverManager.getConnection(url, username, pass)
 
@@ -37,7 +37,7 @@ object databaseMethods {
 
     // Use in real app to avoid deleting your table
     statement.execute("CREATE TABLE IF NOT EXISTS Players (name TEXT, x DOUBLE, y DOUBLE, kills INT, deaths INT, angle DOUBLE, lastUpdate Long)")
-    statement.execute("CREATE TABLE IF NOT EXISTS Projectiles (user TEXT, id INT, x DOUBLE, y DOUBLE, angle DOUBLE, lastUpdate Long, lifetime Long)")
+    statement.execute("CREATE TABLE IF NOT EXISTS Projectiles (user TEXT, id INT, x DOUBLE, y DOUBLE, lastUpdate Long, lifetime Long)")
   }
 
   def playerExists(name: String): Boolean = {
@@ -49,16 +49,14 @@ object databaseMethods {
 
 
   def makePlayer(name: String): Unit = {
-    val statement = connection.prepareStatement("INSERT INTO Players VALUE (?, ?, ?, ?, ?, ?, ?)")
-
+    val statement = connection.prepareStatement("INSERT INTO Players VALUE (?, ?, ?, ?, ?, ?)")
     statement.setString(1, name) // name
     statement.setDouble(2, math.random()*800)  // x
     statement.setDouble(3, math.random()*800)  // y
     statement.setInt(4, 0)       // kills
     statement.setInt(5, 0)       // deaths
-    statement.setDouble(6, null)  // angle  // I DON'T THINK PLAYERS WILL FIRE THE SECOND THEY SPAWN IN THE GAME
-    statement.setLong(7, System.nanoTime())
-
+    // statement.setDouble(6, null)  // angle  // I DON'T THINK PLAYERS WILL FIRE THE SECOND THEY SPAWN IN THE GAME
+    statement.setLong(6, System.nanoTime())
     statement.execute()
   }
 
@@ -96,8 +94,7 @@ object databaseMethods {
     val x: Double = result.getDouble("x")
     val y: Double = result.getDouble("y")
     val time: Long = result.getLong("lastUpdate")
-    val deltaS: Long = System.nanoTime() - time
-
+    val deltaS = (System.nanoTime() - time) / 1000000000.0
 
     statement = connection.prepareStatement("UPDATE Players SET x=?, y=?, lastUpdate=? WHERE name=?")
     statement.setDouble(1, x+(horiz*speed*deltaS))
@@ -185,12 +182,13 @@ object databaseMethods {
     val projectiles: ResultSet = connection.prepareStatement("SELECT * FROM Projectiles").executeQuery()
     val players: ResultSet = connection.prepareStatement("SELECT * FROM Players").executeQuery()
 
-    val projectileMap: Map[Int, List[Double]] = Map()
+    val projectileMap: Map[Int, List[String]] = Map()
     while(projectiles.next()) {
-      val projX: Double = projectiles.getDouble("x")
-      val projY: Double = projectiles.getDouble("y")
+      val projUser: String = projectiles.getString("user")
+      val projX: String = projectiles.getDouble("x").toString
+      val projY: String = projectiles.getDouble("y").toString
       val id: Int = projectiles.getInt("id")
-      projectileMap(id) -> List(projX, projY)
+      projectileMap(id) -> List(projX, projY, projUser)
     }
 
     val playerMap: Map[String, List[Double]] = Map()
@@ -204,10 +202,10 @@ object databaseMethods {
     for (projKey <- projectileMap.keys){
       for (playKey <- playerMap.keys){
         // distance formula
-        val xSquared: Double = math.pow(projectileMap(projKey)(0) - playerMap(playKey)(0), 2)
-        val ySquared: Double = math.pow(projectileMap(projKey)(1) - playerMap(playKey)(1), 2)
+        val xSquared: Double = math.pow(projectileMap(projKey)(0).toDouble - playerMap(playKey)(0), 2)
+        val ySquared: Double = math.pow(projectileMap(projKey)(1).toDouble - playerMap(playKey)(1), 2)
         val d: Double = math.pow(xSquared + ySquared, 0.5)
-        if (d < playerRadius){
+        if (d < playerRadius && playKey != projectileMap(projKey)(3)){
           theMap(projKey) -> playKey
         }
       }
@@ -215,8 +213,86 @@ object databaseMethods {
     theMap
   }
 
+  def deletePlayer(name: String): Unit = {
+    // delete player from the table
+    var statement = connection.prepareStatement("DELETE FROM Players WHERE name=?")
+    statement.setString(1, name)
+    statement.execute()
+
+    // delete their projectiles from the table
+    statement = connection.prepareStatement("DELETE FROM Projectiles WHERE user=?")
+    statement.setString(1, name)
+    statement.execute()
+  }
+
+
+  def CheckOutOfBounds(name: String): Unit = {
+    val worldSize: Double = 800.0
+    val statement = connection.prepareStatement("SELECT * FROM Players WHERE name=?")
+    statement.setString(1, name)
+    val result: ResultSet = statement.executeQuery()
+    result.next()
+    val playerX: Double = result.getDouble("x")
+    val playerY: Double = result.getDouble("y")
+    if(playerX > worldSize){
+      // if player is beyond 800
+      val theStatement = connection.prepareStatement("UPDATE Players SET x=? WHERE name=?")
+      theStatement.setDouble(1, worldSize)
+      theStatement.setString(2, name)
+      statement.execute()
+    }else if(playerX < worldSize){
+      val theStatement = connection.prepareStatement("UPDATE Players SET x=? WHERE name=?")
+      theStatement.setDouble(1, 0.0)
+      theStatement.setString(2, name)
+      statement.execute()
+    }
+    if(playerY > worldSize){
+      val theStatement = connection.prepareStatement("UPDATE Players SET y=? WHERE name=?")
+      theStatement.setDouble(1, worldSize)
+      theStatement.setString(2, name)
+      statement.execute()
+    }else if(playerY < worldSize){
+      val theStatement = connection.prepareStatement("UPDATE Players SET y=? WHERE name=?")
+      theStatement.setDouble(1, 0.0)
+      theStatement.setString(2, name)
+      statement.execute()
+    }
+  }
+
+
+  def checkLifeTime(id: Int): Unit = {
+    val lifeTime: Double = 2.0 // seconds
+    val statement = connection.prepareStatement("SELECT * FROM Projectiles WHERE id=?")
+    statement.setInt(1, id)
+    val result: ResultSet = statement.executeQuery()
+    result.next()
+    val currentLife: Long = result.getLong("lastUpdate")
+    if ((System.nanoTime()-currentLife)/1000000000.0 > lifeTime){
+      val statementTwo = connection.prepareStatement("DELETE FROM Projectiles WHERE id=?")
+      statementTwo.setInt(1, id)
+      statement.execute()
+    }
+  }
+
+
+  def getPlayerProjectiles(name: String): List[Map[String, Double]] = {
+    var theList: List[Map[String, Double]] = List()
+    val statement = connection.prepareStatement("SELECT * FROM Projectiles WHERE user=?")
+    statement.setString(1, name)
+    val result: ResultSet = statement.executeQuery()
+    while(result.next()){
+      var thisMap: Map[String, Double] = Map()
+      val x: Double = result.getDouble("x")
+      val y: Double = result.getDouble("y")
+      thisMap = Map("x"-> x, "y"-> y)
+      theList=theList:+thisMap
+    }
+    theList
+  }
+
 
   def getAllPlayers(): List[Map[String, String]] = {
+    // fix this to add projectiles and whatnot
     var theList: List[Map[String, String]] = List()
     // var theMap: Map[String, String] = Map()
     val result: ResultSet = connection.prepareStatement("SELECT * FROM Players").executeQuery()
@@ -225,13 +301,15 @@ object databaseMethods {
       val x: String = result.getDouble("x").toString
       val y: String = result.getDouble("y").toString
       val kills: String = result.getInt("kills").toString
-      val deaths: String = result.getInt("deaths").toString
+      // val deaths: String = result.getInt("deaths").toString
+      // val projectiles: List[Map[String, Double]] = getPlayerProjectiles(name)
       theList=theList:+Map(
         "Name" -> name,
         "x" -> x,
         "y" -> y,
         "Kills" -> kills,
-        "Deaths" -> deaths
+        // "Projectile" -> projectiles
+        // "Deaths" -> deaths
       )
     }
     theList

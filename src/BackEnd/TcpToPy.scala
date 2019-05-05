@@ -1,12 +1,14 @@
 package BackEnd
 
-case class SendJSON(message: String)
+// case class SendJSON(message: String)
 
 import java.net.InetSocketAddress
 
-import akka.actor.{Actor, ActorRef}
+import akka.actor.{Actor, ActorRef, ActorSystem, Props}
 import akka.io.{IO, Tcp}
 import akka.util.ByteString
+import BackEnd.Methods.databaseMethods._
+import play.api.libs.json.{JsValue, Json}
 
 // import play.api.libs.json.{JsValue, Json}
 
@@ -22,7 +24,7 @@ import akka.util.ByteString
 
 
 
-class tcpServer(theGameActor: ActorRef) extends Actor{
+class TcpToPy(theGameActor: ActorRef) extends Actor{
 
   import Tcp._
   import context.system
@@ -38,19 +40,13 @@ class tcpServer(theGameActor: ActorRef) extends Actor{
   override def receive: Receive = {
     // case b: Bound => println("Listening on port: " + b.localAddress.getPort)
     case c: Connected =>
-      // println("Client Connected: " + c.remoteAddress)
-
-      // make a new game actor for each player here? (using their sender() actor ref)
-      // if there is a new player, make a new actor to run their inputs?
-
-
+      println("Client Connected: " + c.remoteAddress)
       // this will be solely for the server
-
       // this.clients = this.clients + sender()
       this.theServer = sender()
       this.theServer ! Register(self) // this establishes the connection
     case PeerClosed =>
-      // println("Client Disconnected: " + sender())
+      println("Client Disconnected: " + sender())
       // this.clients = this.clients - sender()
       this.theServer = _
     case r: Received =>
@@ -58,31 +54,57 @@ class tcpServer(theGameActor: ActorRef) extends Actor{
       // this will be a json with input
       theBuffer += r.data.utf8String
 
-
       //check this out, don't know what this does yet, but hopefully it reads the json correctly
       while (theBuffer.contains(theDelimiter)) {
         val jsonMessage = theBuffer.substring(0, theBuffer.indexOf(theDelimiter))
         theBuffer = theBuffer.substring(theBuffer.indexOf(theDelimiter) + 1)
 
+        val parsed: JsValue = Json.parse(jsonMessage)
+        val theAction: String = (parsed \ "action").as[String]
+        if(theAction == "disconnect"){
+          val username: String = (parsed \ "username").as[String]
+          theGameActor ! disconnectUser(username)
+        }else if(theAction == "regular"){
+          val regularParsed: Map[String, JsValue] = (parsed \ "data").as[Map[String, JsValue]]
+          val theRegularJSON: String = Json.stringify(Json.toJson(regularParsed))
+          theGameActor ! giveJSON(jsonMessage)
+        }
 
-        //handleMessageFromWebServer(curr)
-
-
-
-        theGameActor ! giveJSON(jsonMessage)
+        // theGameActor ! giveJSON(jsonMessage)
         // do something with jsonMessage
         // the gameActor from main method will be sent this json string
 
       }
 
 
-
+    case giveNewJSON =>
+      theGameActor ! giveNewJSON
 
 
     case send: SendJSON =>
       // println("Sending: " + send.message)
       // this.clients.foreach((client: ActorRef) => client ! Write(ByteString(send.message)))
-      this.theServer ! Write(ByteString(send.message))
+      this.theServer ! Write(ByteString(send.message+theDelimiter))
+    // the py server is sent the json message
+  }
+
+}
+object TcpToPy {
+
+  def main(args: Array[String]): Unit = {
+
+    val actorSystem = ActorSystem()
+
+    import actorSystem.dispatcher
+
+    import scala.concurrent.duration._
+
+    val theGameActor = actorSystem.actorOf(Props(classOf[gameActor]))
+    val server = actorSystem.actorOf(Props(classOf[TcpToPy], theGameActor))
+
+
+    actorSystem.scheduler.schedule(16.milliseconds, 32.milliseconds, theGameActor, Update)  // Tells gameActor to update itself
+    actorSystem.scheduler.schedule(32.milliseconds, 32.milliseconds, server, giveNewJSON) // Tells tcp to send the json
   }
 
 }
