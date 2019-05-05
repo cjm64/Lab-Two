@@ -15,6 +15,6 @@ within = config.to.be.within(0, 800);
 describe('test collision', playerHitFunction(true, true), {
     it('returns the boolean of condition': {
         var: result = true,
-        assert:equal(result, true, 'collision'),
+        assert:equal(result, true, 'collision')
 }
-};
+}

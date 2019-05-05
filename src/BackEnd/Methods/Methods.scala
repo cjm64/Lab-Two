@@ -78,7 +78,7 @@ object Methods {
 
 
     // now we need to connect to the database and see if the name is in the database
-    // if it is, update its info using these vals
+    // if it is, update its info using these values
     // else, you should make an entry in the table
       // if new entry, create a random spawn location
     // adjust the movement by 1 in the correct direction (unless 0 OR if they'd go off the map)
@@ -161,7 +161,3 @@ object Methods {
     * }
     */
 
-
-
-
-}
