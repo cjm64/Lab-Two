@@ -17,11 +17,11 @@ class gameActor extends Actor{
     val parsed: JsValue = Json.parse(jsonString)
 
     val name: String = (parsed \ "name").as[String] // this tell us which sprite to update and what sprite to fire from
-    println(name)
+    // println(name)
     val vertical: Int = (parsed \ "vertical").as[Int]      // 0 - nothing, -1 - down, 1 - up
-    println(vertical)
+    // println(vertical)
     val horizontal: Int = (parsed \ "horizontal").as[Int]  // 0 - nothing, -1 - left, 1 - right
-    println(horizontal)
+    // println(horizontal)
     val angle: Double = (parsed \ "angle").as[Double]      // if this is not null, do something with it
 
 
@@ -94,7 +94,7 @@ class gameActor extends Actor{
       }
       // println("foundServer: true")
       val theJSON: String = Json.stringify(Json.toJson(Map("PlayerData" -> someList)))
-      println(theJSON)
+      // println(theJSON)
       theJSON
     }else{
       // println("foundServer: false")

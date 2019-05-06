@@ -7,10 +7,10 @@ var gameState;
 var initializedObject;
 
 function isUsed(name){
-    if(gameState["Playerdata"] != undefined){
-        for(var y = 0; y < gameState["Playerdata"].length; y++){
-            //console.log("compare: " + gameState["Playerdata"][y]["Name"] + " and "+ name)
-            if(gameState["Playerdata"][y]["Name"] == name){
+    if(gameState["PlayerData"] != undefined){
+        for(var y = 0; y < gameState["PlayerData"].length; y++){
+            //// console.log("compare: " + gameState[PlayerData"][y]["Name"] + " and "+ name)
+            if(gameState["PlayerData"][y]["Name"] == name){
                 return true
             }
         }
@@ -20,7 +20,7 @@ function isUsed(name){
 
 }
 
-gameState = {"Playerdata":[{
+gameState = {"PLayerData":[{
         "Name":"test",
         "x": 350,
         "y": 350,
@@ -33,45 +33,37 @@ function MyButton(){
     var control = document.getElementById('controls');
     var modal = document.getElementById('myModal');
     name = document.getElementById('username').value;
-    console.log(name)
-    console.log(gameState)
+    // console.log(name)
+    // console.log(gameState)
     if(isUsed(name)){
         document.getElementById('choose').innerHTML = name + " is already taken<br />"
     }
     else{
         jason["name"] = name
         modal.style.display = "none";
-        initializedObject = {
-                "Name" : name,
-                "x" : 400,
-                "y" : 400,
-                "Kills" : 0,
-                "Projectile" : []
-            }
-
-        gameState["Playerdata"].push(initializedObject)
+        socket.emit("register", name, JSON.stringify(jason))
         startGame()
         control.style.display = "block";
-        socket.emit("register", name, JSON.stringify(jason))
+
     }
 }
 
 var socket = io.connect({transports: ['websocket']});
 socket.on('connect', function (event) {
-    console.log("connected")
+    // console.log("connected")
 });
 socket.on('message', function (event) {
     // received a message from the server
-    console.log(event);
+    // console.log(event);
     message = JSON.parse(event)
     if(message["type"] == "register"){
-        console.log(message["data"])
+        // console.log(message["data"])
     }
     else if(message["type"] == "game"){
         gameState = message["data"]
     }
     else{
-        console.log("unknown data type")
+        // console.log("unknown data type")
     }
 });
 
@@ -181,13 +173,14 @@ function update(time, delta){
     var scoreboard = document.getElementById('leaderboard');
     if(tabKey.isDown){
         scoreboard.style.display = "block"
-        console.log("q pressed")
+        // console.log("q pressed")
     } else {
         scoreboard.style.display = "none"
     }
 
     parsedbtf = gameState
-    listofplayers = parsedbtf["Playerdata"]
+    // console.log(parsedbtf)
+    listofplayers = parsedbtf["PlayerData"]
     top_kill = 0
     top_player = "you"
     for(var i = 0; i < listofplayers.length; i++){

@@ -20,7 +20,7 @@ def listen_to_model(the_socket):
         while delimiter in buffer:
             message = buffer[:buffer.find(delimiter)]
             buffer = buffer[buffer.find(delimiter)+1:]
-            toAll = {"type":"game", "data": message}
+            toAll = {"type":"game", "data": json.loads(message)}
             jsonToAll = json.dumps(toAll)
             socket_server.emit('message', jsonToAll, broadcast=True)
 
@@ -49,7 +49,7 @@ sidToUsername = {}
 
 @socket_server.on('register')
 def got_message(username, jason):
-    print("register "+ username)
+    # print("register "+ username)
     usernameToSid[username] = request.sid
     sidToUsername[request.sid] = username
     delimiter = "~"
@@ -57,7 +57,7 @@ def got_message(username, jason):
     registered = {"type": "register", "data": "registered " + username}
     toSender = json.dumps(registered)
     socket_server.emit("message", toSender)
-    #model_socket.sendall((json.dumps(data) + delimiter).encode())
+    model_socket.sendall((json.dumps(data) + delimiter).encode())
 
 
 @socket_server.on('disconnect')
@@ -83,12 +83,12 @@ def got_message(jason):
 @socket_server.on('Jason')
 def got_message(jason):
     #print("message")
-    #print(jason)
+    # print(jason)
     data = {"action": "regular", "data": json.loads(jason)}
     delimiter = "~"
     model_socket.sendall((json.dumps(data) + delimiter).encode())
 
 
-app_port = 8074
+app_port = 8091
 print("server at localhost:" + str(app_port))
 socket_server.run(app, port=app_port)

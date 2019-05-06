@@ -84,7 +84,7 @@ class TcpToPy(theGameActor: ActorRef) extends Actor{
 
 
     case send: SendJSON =>
-      println("Sending: " + send.message)
+      // println("Sending: " + send.message)
       this.theServer.foreach((client: ActorRef) => client ! Write(ByteString(send.message+theDelimiter)))
       // this.theServer ! Write(ByteString(send.message+theDelimiter))
     // the py server is sent the json message
@@ -106,8 +106,9 @@ object TcpToPy {
     val server = actorSystem.actorOf(Props(classOf[TcpToPy], theGameActor))
 
 
-    actorSystem.scheduler.schedule(16.milliseconds, 32.milliseconds, theGameActor, Update)  // Tells gameActor to update itself
-    actorSystem.scheduler.schedule(32.milliseconds, 32.milliseconds, server, giNewJSON) // Tells tcp to send the json
+    actorSystem.scheduler.schedule(75.milliseconds, 150.milliseconds, theGameActor, Update)  // Tells gameActor to update itself
+    actorSystem.scheduler.schedule(150.milliseconds, 150.milliseconds, server, giNewJSON) // Tells tcp to send the json
+    // actorSystem.scheduler.schedul
   }
 
 }

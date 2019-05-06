@@ -93,7 +93,7 @@ object databaseMethods {
 
 
   def updatePlayerPos(name: String, vert: Int, horiz: Int): Unit = {
-    val speed: Double = 5.0 // 50 px / second
+    val speed: Double = 50.0 // 50 px / second
 
     var statement = connection.prepareStatement("SELECT * FROM Player WHERE theName=?")
     statement.setString(1, name)
