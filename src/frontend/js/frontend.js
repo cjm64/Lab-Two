@@ -20,7 +20,7 @@ function isUsed(name){
 
 }
 
-gameState = {"PLayerData":[{
+gameState = {"PlayerData":[{
         "Name":"test",
         "x": 350,
         "y": 350,
