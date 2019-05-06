@@ -166,6 +166,10 @@ function create () {
     this.cameras.main.height = 800
 
 }
+var clock = 0;
+var ve;
+var ho;
+var jangle;
 
 function update(time, delta){
 
@@ -248,8 +252,26 @@ function update(time, delta){
         jason['horizontal'] = 0;
     }
 
-    socket.emit("Jason", JSON.stringify(jason));
-    lastJason = jason;
+    // console.log(clock)
+    /*if(clock == 0){
+        // console.log("sent")
+        socket.emit("Jason", JSON.stringify(jason));
+        jason["angle"] = 100;
+    }
+    else if(clock == 3){
+        clock = -1;
+    }
+    clock += 1*/
+
+    if(ve != jason["vertical"] || ho != jason["horizontal"] || jangle != jason["angle"]){
+        console.log("sent")
+        socket.emit("Jason", JSON.stringify(jason));
+    }
+
+    ve = jason["vertical"];
+    ho = jason["horizontal"];
+    jangle = jason["angle"];
+
 
     jason["angle"] = 100
 

@@ -106,8 +106,8 @@ object TcpToPy {
     val server = actorSystem.actorOf(Props(classOf[TcpToPy], theGameActor))
 
 
-    actorSystem.scheduler.schedule(75.milliseconds, 150.milliseconds, theGameActor, Update)  // Tells gameActor to update itself
-    actorSystem.scheduler.schedule(150.milliseconds, 150.milliseconds, server, giNewJSON) // Tells tcp to send the json
+    actorSystem.scheduler.schedule(60.milliseconds, 120.milliseconds, theGameActor, Update)  // Tells gameActor to update itself
+    actorSystem.scheduler.schedule(120.milliseconds, 120.milliseconds, server, giNewJSON) // Tells tcp to send the json
     // actorSystem.scheduler.schedul
   }
 
