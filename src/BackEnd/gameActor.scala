@@ -26,7 +26,7 @@ class gameActor extends Actor{
 
 
     if (playerExists(name)){
-      updatePlayerPos(name, vertical, horizontal)
+      updatePlayerInput(name, vertical, horizontal)
     }else{
       makePlayer(name)
     }
@@ -53,7 +53,7 @@ class gameActor extends Actor{
     }
 
     // check for out of bounds
-    CheckOutOfBounds(name)
+    // CheckOutOfBounds(name)
 
     // check for projectile lifetime (but in the updateObjects method)
 
@@ -127,6 +127,8 @@ class gameActor extends Actor{
 
       val resultTwo: ResultSet = connection.createStatement().executeQuery("SELECT * FROM Player")
       while(resultTwo.next()){
+        val theName: String = resultTwo.getString("theName")
+        updatePlayerPos(theName)
         CheckOutOfBounds(resultTwo.getString("theName"))
       }
 

@@ -4,6 +4,12 @@ function startGame() {
 
 var name;
 var gameState;
+var jason = {
+    'name' : "testing",
+    'vertical' : 0,
+    'horizontal' : 0,
+    'angle': 100
+}
 
 function isUsed(name){
     gameState["Playerdata"].foreach(function(na){
@@ -30,16 +36,27 @@ function test(){
     }*/
 }
 
-var socket = require('socket.io-client')('http://localhost:8053');
-socket.on('connect', function(){
-    console.log('WebSocket Client Connected');
+
+
+var socket = require('socket.io-client')('http://localhost:8110', {transports:['websocket']});
+ //transports: ['websocket']
+socket.on('connect', function (event) {
+    console.log("connected")
+    socket.emit("register", "testing", JSON.stringify(jason))
 });
-socket.on('event', function(data){
-    console.log(data)
-    gameState = message.parse()
-});
-socket.on('disconnect', function(){
-    console.log('WebSocket Client Disconnected');
+socket.on('message', function (event) {
+    // received a message from the server
+    // console.log(event);
+    message = JSON.parse(event)
+    if(message["type"] == "register"){
+        console.log(message["data"])
+    }
+    else if(message["type"] == "game"){
+        gameState = message["data"]
+    }
+    else{
+        // console.log("unknown data type")
+    }
 });
 
 
