@@ -5,6 +5,11 @@ import java.sql.{Connection, DriverManager, ResultSet}
 import BackEnd.Methods.password.word
 
 object databaseMethods {
+
+  var players: Map[String, Map[String, String]] = Map()
+  var projectiles: List[Map[String, String]] = List()
+
+
   val url = "jdbc:mysql://localhost/mysql?serverTimezone=UTC"
   val username = "root"
   val pass: String = word
@@ -45,7 +50,7 @@ object databaseMethods {
     // statement.execute("CREATE TABLE IF NOT EXISTS Projectiles (user TEXT, id INT, x DOUBLE, y DOUBLE, lastUpdate Long, lifetime Long)")
   }
 
-
+/*
   def playerExists(name: String): Boolean = {
     val statement = connection.prepareStatement("SELECT * FROM Player WHERE theName=?")
     // val statement = connection.prepareStatement("SELECT * FROM Players")
@@ -420,7 +425,7 @@ object databaseMethods {
 
   // def getNewProjectiles():
 
-
+*/
 }
 
 

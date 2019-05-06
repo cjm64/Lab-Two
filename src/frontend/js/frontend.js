@@ -201,6 +201,7 @@ function update(time, delta){
                 mb.x = listofplayers[i]["Projectile"][q]["x"]
                 mb.y = listofplayers[i]["Projectile"][q]["y"]
             }
+
         }
         if(listofplayers[i]["Name"] != name) {
             if (Math.abs(player.x - listofplayers[i]["x"]) < 500 && Math.abs(player.y - listofplayers[i]["y"]) < 500) {

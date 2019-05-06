@@ -1,6 +1,7 @@
 package BackEnd.Methods
 
 object emilysMethods {
+  /*
   var players: Map[String, Map[String, String]] = Map()
   var projectiles: List[Map[String, String]] = List()
   var id = 1
@@ -54,4 +55,5 @@ object emilysMethods {
     pMap = pMap + ("lifetime" -> lt)
     projectiles = projectiles :+ pMap
   }
+  */
 }

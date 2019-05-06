@@ -1,7 +1,7 @@
 package BackEnd.Methods
 
 object Chrissssfun {
-
+  /*
   var Players: Map[String, Map[String, String]] = Map()
   var Projectiles: List[Map[String,String]] = List()
 
@@ -68,5 +68,5 @@ object Chrissssfun {
     }
     Players -= name
   }
-
+*/
 }

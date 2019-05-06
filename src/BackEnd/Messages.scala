@@ -9,3 +9,6 @@ case class disconnectUser(user: String)
 case object foundTheServer
 // case object askBackForJSON
 case object giNewJSON
+case object updateTheDatabase
+case object loadToDictionary
+

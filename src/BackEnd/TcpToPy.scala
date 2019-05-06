@@ -24,7 +24,7 @@ import play.api.libs.json.{JsValue, Json}
 
 
 
-class TcpToPy(theGameActor: ActorRef) extends Actor{
+class TcpToPy(theGameActor: ActorRef, databaseActor: ActorRef) extends Actor{
 
   import Tcp._
   import context.system
@@ -41,6 +41,8 @@ class TcpToPy(theGameActor: ActorRef) extends Actor{
     case b: Bound => println("Listening on port: " + b.localAddress.getPort)
     case c: Connected =>
       println("Client Connected: " + c.remoteAddress)
+
+      databaseActor ! loadToDictionary
       // this will be solely for the server
       // this.clients = this.clients + sender()
       this.theServer += sender()
@@ -82,9 +84,10 @@ class TcpToPy(theGameActor: ActorRef) extends Actor{
       // println("Sending giveNewJSON to gameActor")
     //   theGameActor ! askBackForJSON
 
+    // case message: updateDictionary => theGameActor
 
     case send: SendJSON =>
-      // println("Sending: " + send.message)
+      println("Sending: " + send.message)
       this.theServer.foreach((client: ActorRef) => client ! Write(ByteString(send.message+theDelimiter)))
       // this.theServer ! Write(ByteString(send.message+theDelimiter))
     // the py server is sent the json message
@@ -99,15 +102,17 @@ object TcpToPy {
     val actorSystem = ActorSystem()
 
     import actorSystem.dispatcher
-
     import scala.concurrent.duration._
 
     val theGameActor = actorSystem.actorOf(Props(classOf[gameActor]))
-    val server = actorSystem.actorOf(Props(classOf[TcpToPy], theGameActor))
+    val updateDatabase = actorSystem.actorOf(Props(classOf[updateDatabase]))
+    val server = actorSystem.actorOf(Props(classOf[TcpToPy], theGameActor, updateDatabase))
 
 
-    actorSystem.scheduler.schedule(60.milliseconds, 120.milliseconds, theGameActor, Update)  // Tells gameActor to update itself
+
+    actorSystem.scheduler.schedule(16.milliseconds, 120.milliseconds, theGameActor, Update)  // Tells gameActor to update itself
     actorSystem.scheduler.schedule(120.milliseconds, 120.milliseconds, server, giNewJSON) // Tells tcp to send the json
+    actorSystem.scheduler.schedule(0.milliseconds, 6000.milliseconds, updateDatabase, updateTheDatabase)
     // actorSystem.scheduler.schedul
   }
 

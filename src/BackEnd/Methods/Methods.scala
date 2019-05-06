@@ -4,160 +4,222 @@ import BackEnd.scalaClasses.{Player, Projectile, theWorld}
 
 import play.api.libs.json.{JsValue, Json}
 import java.sql.{Connection, DriverManager, ResultSet}
+import scala.collection.mutable
 
+// projectileMap += id -> List(projX, projY, projUser)
 object Methods {
 
+  var Players: mutable.Map[String, mutable.Map[String, String]] = mutable.Map()
+  var Projectiles: List[mutable.Map[String, String]] = List()
+  var id = 1
 
-
-  // make this a circle around the player with radius 16?
-
-  // use distance formula and if the distance is smaller than the radius of the circle, then collision
-  def hitDetection(player: Player, projectile: Projectile): Boolean = {
-    // returns true if there is collision
-    if(player.x > projectile.x + projectile.sizeX || projectile.x > player.x + player.sizeX){
-      false
-    }else if(player.y > projectile.y + projectile.sizeY || projectile.y > player.y + player.sizeY){
-      false
-    }else{
-      true
-    }
-  }
-
-
-  def offMapDetection(player: Player, world: theWorld): Boolean = {
-    // returns true if the player is out of bounds
-    if(player.x < 0 || player.x > world.boundX){
-      true
-    }else if(player.y < 0 || player.y > world.boundY){
-      true
-    }else{
-      false
-    }
-  }
-
-  /**
-    *
-    * var jason = {
-    * 'name' : name,
-    * 'vertical' : 0,     (either -1, 0, or 1)
-    * 'horizontal' : 0,   (either -1, 0, or 1)
-    * 'angle': null
-    * }
-    */
-
-  /**
-    * format of the table:
-    *
-    * player table:
-    * name, x, y, kills, deaths, angle(may be null),
-    *
-    * projX(may be null), projY(may be null), startX(may be null), startY(may be null)
-    *
-    * projectile table:
-    * user, x, y, angle, startingX?, startingY?
-    */
-
-
-
-
-
-
-
-
-
-// this is big boi method
-  def useJSON(jsonString: String): Unit = {
-
-    val parsed: JsValue = Json.parse(jsonString)
-
-    val name: String = (parsed \ "name").as[String]        // this tell us which sprite to update and what sprite to fire from
-    val vertical: Int = (parsed \ "vertical").as[Int]      // 0 - nothing, -1 - down, 1 - up
-    val horizontal: Int = (parsed \ "horizontal").as[Int]  // 0 - nothing, -1 - left, 1 - right
-    val angle: Double = (parsed \ "angle").as[Double]      // if this is not null, do something with it
-
-
-
-    // now we need to connect to the database and see if the name is in the database
-    // if it is, update its info using these values
-    // else, you should make an entry in the table
-      // if new entry, create a random spawn location
-    // adjust the movement by 1 in the correct direction (unless 0 OR if they'd go off the map)
-    // now check if any projectiles collide with players
-      // if they do collide, then delete both and adjust data accordingly
-
-    // now that we know the user is in the table, check if angle is null
-    // if angle == null, do nothing
-    // if it is not, make a new projectile using that angle and the players position(their position plus some)
-
-
-
-    // now that we calculated the information, we need to send the information in a new json
-  }
-  def makeJSON(): JsValue = {
-
-    // note that this is not what the database looks like
-    var thedatabase: Map[String, Int] = Map("id" -> 1)
-
-    var someList: List[Map[String, JsValue]] = List()
-
-    for (player <- thedatabase){
-      // for()
-      var projectile: JsValue = Json.toJson("I just declared projectile")
-
-      if(Json.toJson("angle != null") == Json.toJson("spaghetti")){
-        projectile = Json.toJson(Map(
-          "x" -> 0.0, // double from table
-          "y" -> 0.0, // double from table
-          "angle" -> 0.0 // double from table
-        ))
-      }else{
-        // we might have to do above, but with nulls
-        projectile = Json.toJson(null)
+  def playerExists(name: String): Boolean = {
+    for((k, v) <- Players){
+      if(k == name){
+        return true
       }
+    }
+    false
+  }
 
-      someList = someList:+Map(
-        "Name" -> Json.toJson(player),
-        "Kills" -> Json.toJson("from database under player"),
-        "Deaths" -> Json.toJson("from database under player"),
-        "x" -> Json.toJson("from database under player"),
-        "y" -> Json.toJson("from database under player"),
-        "Projectile" -> projectile
+
+  def makePlayer(name: String): Unit = {
+    if(playerExists(name) == false){
+      val xLoc: String = (math.random() * 800).toString
+      val yLoc: String = (math.random() * 800).toString
+      val kills: String = 0.toString
+      val lUpdate: String = System.nanoTime().toString
+      val n = name
+      val iX: String = 0.toString
+      val iY: String = 0.toString
+      var pMap: mutable.Map[String, String] = mutable.Map()
+      pMap = pMap + ("x" -> xLoc)
+      pMap = pMap + ("y" -> yLoc)
+      pMap = pMap + ("kills" -> kills)
+      pMap = pMap + ("lastUpdate" -> lUpdate)
+      pMap = pMap + ("theName" -> n)
+      pMap = pMap + ("inputX" -> iX)
+      pMap = pMap + ("inputY" -> iY)
+      Players = Players + (name -> pMap)
+    }
+  }
+
+
+  def makeProjectile(name: String, angle: Double): Unit = { // it only returns an int so that gameActor can send new projectiles
+    val u = name
+    id += 1
+    val pid: String = id.toString
+    val x = Players(name)("x")
+    val y = Players(name)("y")
+    val a: String = angle.toString
+    val lu: String = System.nanoTime().toString
+    val lt: String = 0.0.toString
+    var pMap: mutable.Map[String, String] = mutable.Map()
+    pMap = pMap + ("user" -> u)
+    pMap = pMap + ("id" -> pid)
+    pMap = pMap + ("x" -> x)
+    pMap = pMap + ("y" -> y)
+    pMap = pMap + ("angle" -> a)
+    pMap = pMap + ("lastUpdate" -> lu)
+    pMap = pMap + ("lifetime" -> lt)
+    Projectiles = Projectiles :+ pMap
+  }
+
+
+
+
+
+  // projectileMap += id -> List(projX, projY, projUser)
+
+  def updatePlayerPosition(name: String, vert: Int, horis: Int): Unit = {
+    val speed: Double = 50.0 // 50 px / second
+
+    Players(name)("inputX") = horis.toString
+    Players(name)("inputY") = vert.toString
+    val time = Players(name)("lastUpdate").toLong
+    val deltaS = (System.nanoTime() - time) / 1000000000.0
+    Players(name)("x") = (Players(name)("x").toDouble + (Players(name)("inputX").toDouble  * deltaS * speed)).toString
+    Players(name)("y") = (Players(name)("y").toDouble + (Players(name)("inputY").toDouble  * deltaS * speed)).toString
+    Players(name)("lastUpdate") = System.nanoTime().toString
+  }
+
+  def updateProjectilePos(id: Int): Unit = {
+    val speed: Double = 100.0
+    for(p <- Projectiles){
+      if(p("id").toInt == id){
+        val angle = p("angle").toDouble
+        val time = p("lastUpdate").toLong
+        val deltaS = (System.nanoTime() - time)/1000000000.0
+        p("x") = (p("x").toDouble + (math.sin(angle)*speed*deltaS)).toString
+        p("y") = (p("y").toDouble + (math.cos(angle)*speed*deltaS)).toString
+        p("lastUpdate") = System.nanoTime().toString
+        p("lifetime") = (p("lifetime").toDouble + deltaS).toString
+      }
+    }
+  }
+
+  // LOOK HERE, I DONT KNOW ABOUT FILTER
+  def collision(name: String, id: Int): Unit = {
+    var killer = ""
+    Players(name)("x") = (math.random() * 800).toString
+    Players(name)("y") = (math.random() * 800).toString
+    for(p <- Projectiles){
+      if (p("id").toInt == id){
+        killer = p("user")
+        Projectiles = Projectiles.filter(_ != p)
+      }
+    }
+    Players(killer)("kills")= (Players(killer)("kills").toDouble + 1).toString
+  }
+
+  def checkCollision(): mutable.Map[Int, String] = {
+    var theMap: mutable.Map[Int, String] = mutable.Map()
+    val playerRadius: Double = 16.0
+    for((k,v) <- Players){
+      for(p <- Projectiles){
+        if(p("user") != k) {
+          val d: Double = math.sqrt(math.pow(p("x").toDouble - v("x").toDouble, 2) - math.pow(p("y").toDouble - v("y").toDouble, 2))
+          if (d < playerRadius) {
+            theMap = theMap + (p("id").toInt -> k)
+          }
+        }
+      }
+    }
+    theMap
+  }
+
+  def CheckOutOfBounds(name: String): Unit = {
+    val worldSize: Double = 800.0
+    val result: mutable.Map[String, String] = Players(name)
+    val playerX: Double = result("x").toDouble
+    val playerY: Double = result("y").toDouble
+    if(playerX > worldSize){
+      // if player is beyond 800
+      Players(name)("x") = worldSize.toString
+    }else if(playerX < 0.0){
+      Players(name)("x") = 0.0.toString
+    }
+    if(playerY > worldSize){
+      Players(name)("y") = worldSize.toString
+    }else if(playerY < 0.0){
+      Players(name)("y") = 0.0.toString
+    }
+  }
+
+
+  def deletePlayer(name: String): Unit = {
+    for(p <- Projectiles){
+      if(p("user") == name){
+        Projectiles = Projectiles.filter(_ != p)
+      }
+    }
+    Players -= name
+  }
+
+
+
+
+
+  def checkLifeTime(id: Int): Unit = {
+    val lifeTime: Double = 2.0 // seconds
+    for(i <- Projectiles){
+      if(i("id") == id.toString){
+        val lastUpdate: Long = i("lastUpdate").toLong
+        val currentLife: Double = i("lifetime").toDouble
+        val deltaS: Double = (System.nanoTime() - lastUpdate)/1000000000.0
+        if (currentLife+deltaS > lifeTime){
+          Projectiles = Projectiles.filter(_ != i)
+        }
+      }
+    }
+  }
+
+  def updatePlayerInput(name: String, vert: Int, horiz: Int): Unit = {
+    Players(name)("inputX") = horiz.toString
+    Players(name)("inputY") = vert.toString
+    //println(Players)
+  }
+
+  def getPlayerProjectiles(name: String): List[mutable.Map[String, Double]] = {
+    var theList: List[mutable.Map[String, Double]] = List()
+    for(i <- Projectiles){
+      if(i("user") == name){
+        var thisMap: mutable.Map[String, Double] = mutable.Map()
+        val x: Double = i("x").toDouble
+        val y: Double = i("y").toDouble
+        thisMap = mutable.Map("x"-> x, "y"-> y)
+        theList=theList:+thisMap
+      }
+    }
+    theList
+  }
+
+
+
+  def getAllPlayers(): List[mutable.Map[String, String]] = {
+    // fix this to add projectiles and whatnot
+    var theList: List[mutable.Map[String, String]] = List()
+    // var theMap: mutable.Map[String, String] = mutable.Map()
+    for(player <- Players.keys){
+      val name: String = player
+      val x: String = Players(player)("x")
+      val y: String = Players(player)("y")
+      val kills: String = Players(player)("kills")
+      // val deaths: String = result.getInt("deaths").toString
+      // val projectiles: List[Map[String, Double]] = getPlayerProjectiles(name)
+      theList=theList:+mutable.Map(
+        "Name" -> name,
+        "x" -> x,
+        "y" -> y,
+        "Kills" -> kills,
+        // "Projectile" -> projectiles
+        // "Deaths" -> deaths
       )
     }
-
-    var theMap: Map[String, List[Map[String, JsValue]]] = Map(
-      "PlayerData" -> someList
-    )
-
-    Json.toJson(theMap)
+    theList
   }
 
 
 
-  /**
-    * player = {
-    * "Name": String,
-    * "Kills": Int,
-    * "Deaths": Int,
-    * "x": Double,
-    * "y": Double,
-    * "Immunity": Boolean,  -- maybe
-    * }
-    * players = a list of all players and their data in the format above
-    *
-    * projectile = {
-    * "x": Double,
-    * "y": Double,
-    * "angle": Double
-    * }
-    *
-    * newProjectiles = a list of all newly created projectiles and their data in the format above
-    * (this will be empty if there are no new projectiles)
-    *
-    *
-    * backToFrontJSON = {
-    * "PlayerData":  players,
-    * "NewProjectiles": newProjectiles,
-    * }
-    */
 
+}

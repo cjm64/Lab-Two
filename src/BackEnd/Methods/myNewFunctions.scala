@@ -1,6 +1,7 @@
 package BackEnd.Methods
 
 object myNewFunctions {
+  /*
   var Projectiles: List[Map[String, String]] = List()
   var Players: Map[String, Map[String, String]] = Map()
 
@@ -62,5 +63,5 @@ object myNewFunctions {
     }
     theList
   }
-
+*/
 }
