@@ -201,7 +201,25 @@ function update(time, delta){
                 mb.x = listofplayers[i]["Projectile"][q]["x"]
                 mb.y = listofplayers[i]["Projectile"][q]["y"]
             }
+            for(var k = 0; k < listofplayers.length; k++){
+                if(listofplayers[k]["Name"] != name) {
+                    if (Math.abs(player.x - listofplayers[k]["x"]) < 500 && Math.abs(player.y - listofplayers[k]["y"]) < 500) {
+                        var xd = enemies.get().setActive(true).setVisible(true);
+                        xd.x = listofplayers[k]["x"]
+                        xd.y = listofplayers[k]["y"]
+                    }
+                    for (var j = 0; j < listofplayers[k]["Projectile"].length; j++) {
+                        if (Math.abs(player.x - listofplayers[k]["Projectile"][j]["x"]) < 500 && Math.abs(player.y - listofplayers[k]["Projectile"][j]["y"]) < 500) {
+                            var gun = enemyShots.get().setActive(true).setVisible(true);
+                            gun.x = listofplayers[k]["Projectile"][j]["x"]
+                            gun.y = listofplayers[k]["Projectile"][j]["y"]
+                        }
+                    }
+
+                }
+            }
         }
+
         if(listofplayers[i]["Name"] != name) {
             if (Math.abs(player.x - listofplayers[i]["x"]) < 500 && Math.abs(player.y - listofplayers[i]["y"]) < 500) {
                 var xd = enemies.get().setActive(true).setVisible(true);
