@@ -4,69 +4,80 @@ function startGame() {
 
 var name;
 var gameState;
+var initializedObject;
 
 function isUsed(name){
-    gameState["Playerdata"].foreach(function(na){
-        if(na["Name"] == name){
-            return true
+    if(gameState["PlayerData"] != undefined){
+        for(var y = 0; y < gameState["PlayerData"].length; y++){
+            //// console.log("compare: " + gameState[PlayerData"][y]["Name"] + " and "+ name)
+            if(gameState["PlayerData"][y]["Name"] == name){
+                return true
+            }
         }
-    })
+        return false
+    }
     return false
+
 }
 
-function test(){
+gameState = {"PLayerData":[{
+        "Name":"test",
+        "x": 350,
+        "y": 350,
+        "Kills":2,
+        "Projectile":[]
+    }]}
+
+
+function MyButton(){
     var control = document.getElementById('controls');
     var modal = document.getElementById('myModal');
-    name = document.getElementById('username');
-    modal.style.display = "none";
-    control.style.display = "block";
-    startGame()
-
-    /*if(isUsed(name)){
-        document.getElementById('choose').innerHTML = name + " is already taken"
+    name = document.getElementById('username').value;
+    // console.log(name)
+    // console.log(gameState)
+    if(isUsed(name)){
+        document.getElementById('choose').innerHTML = name + " is already taken<br />"
     }
     else{
+        jason["name"] = name
         modal.style.display = "none";
         socket.emit("register", name, JSON.stringify(jason))
         startGame()
-    }*/
+        control.style.display = "block";
+
+    }
 }
 
 var socket = io.connect({transports: ['websocket']});
 socket.on('connect', function (event) {
-    name = prompt("Please Enter a Username", "Username");
-    while(isUsed(name)){
-        name = prompt("Please Enter Another Username", name);
-    };
-    socket.emit("register", name)
+    // console.log("connected")
 });
 socket.on('message', function (event) {
     // received a message from the server
-    console.log(event);
-    gameState = event.parse()
+    // console.log(event);
+    message = JSON.parse(event)
+    if(message["type"] == "register"){
+        // console.log(message["data"])
+    }
+    else if(message["type"] == "game"){
+        gameState = message["data"]
+    }
+    else{
+        // console.log("unknown data type")
+    }
 });
 
 var jason = {
     'name' : name,
     'vertical' : 0,
     'horizontal' : 0,
-    'angle': 0
+    'angle': 100
 }
 
 var lastJason = jason;
 
 var parsedbtf = {}
 var listofplayers = []
-
-var initializedObject = JSON.stringify({"playerdata" : [{
-        "Name" : name,
-        "x" : 400,
-        "y" : 400,
-        "Kills" : 0,
-        "Projectile" : []
-    }]})
-
-gameState = initializedObject
 
 var config = {
     "type" : Phaser.AUTO,
@@ -141,7 +152,6 @@ function create () {
             var bullet = Shots.get().setActive(true).setVisible(true)
             bullet.shoot(player, pointer)
             jason["angle"] = bullet.angle
-            this.enemies.clear(true)
         }
     }, this); //Sets the angle of the player's projectile when the mouse is clicked.
 
@@ -163,19 +173,25 @@ function update(time, delta){
     var scoreboard = document.getElementById('leaderboard');
     if(tabKey.isDown){
         scoreboard.style.display = "block"
-        console.log("q pressed")
+        // console.log("q pressed")
     } else {
         scoreboard.style.display = "none"
     }
 
-    parsedbtf = JSON.parse(gameState)
-    listofplayers = parsedbtf["playerdata"]
-
+    parsedbtf = gameState
+    // console.log(parsedbtf)
+    listofplayers = parsedbtf["PlayerData"]
+    top_kill = 0
+    top_player = "you"
     for(var i = 0; i < listofplayers.length; i++){
-
+        if(listofplayers[i]["Kills"] > top_kill){
+            top_kill = listofplayers[i]["Kills"]
+            top_player = listofplayers[i]["Name"]
+        }
         if(listofplayers[i]["Name"] == name){
             player.x = listofplayers[i]["x"]
             player.y = listofplayers[i]["y"]
+            document.getElementById("myscore").value = listofplayers[i]["Kills"]
             for(var q = 0; q < listofplayers[i]["Projectile"].length; q++){
                 var mb = Shots.get().setActive(true).setVisible(true);
                 mb.x = listofplayers[i]["Projectile"][q]["x"]
@@ -197,6 +213,8 @@ function update(time, delta){
             }
         }
     }
+    document.getElementById("score").value = top_player + ": " + top_kill.toString()
+
 
     var cursors = this.input.keyboard.addKeys(
         {up: Phaser.Input.Keyboard.KeyCodes.W,
@@ -230,12 +248,12 @@ function update(time, delta){
         jason['horizontal'] = 0;
     }
 
-    socket.emit("Jason", JSON.stringify())
-    lastJason = jason
+    socket.emit("Jason", JSON.stringify(jason));
+    lastJason = jason;
 
-    jason["angle"] = null
+    jason["angle"] = 100
 
-    fire +=1
+    fire +=1;
     return;
 }
 
