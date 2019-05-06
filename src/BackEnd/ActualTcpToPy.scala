@@ -7,7 +7,7 @@ import java.net.InetSocketAddress
 import akka.actor.{Actor, ActorRef, ActorSystem, Props}
 import akka.io.{IO, Tcp}
 import akka.util.ByteString
-import BackEnd.Methods.databaseMethods._
+import BackEnd.Methods.ActualDatabaseMethods._
 import play.api.libs.json.{JsValue, Json}
 
 // import play.api.libs.json.{JsValue, Json}
@@ -24,7 +24,7 @@ import play.api.libs.json.{JsValue, Json}
 
 
 
-class TcpToPy(theGameActor: ActorRef, databaseActor: ActorRef) extends Actor{
+class ActualTcpToPy(theGameActor: ActorRef, databaseActor: ActorRef) extends Actor{
 
   import Tcp._
   import context.system
@@ -52,7 +52,7 @@ class TcpToPy(theGameActor: ActorRef, databaseActor: ActorRef) extends Actor{
       println("Client Disconnected: " + sender())
       this.theServer = this.theServer - sender()
       theGame.foundTheServer = false
-      // this.theServer = _
+    // this.theServer = _
     case r: Received =>
       // println("Received: " + r.data.utf8String)
       // this will be a json with input
@@ -82,7 +82,7 @@ class TcpToPy(theGameActor: ActorRef, databaseActor: ActorRef) extends Actor{
 
 
     case `giNewJSON` => theGameActor ! giveNewJSON
-      // println("Sending giveNewJSON to gameActor")
+    // println("Sending giveNewJSON to gameActor")
     //   theGameActor ! askBackForJSON
 
     // case message: updateDictionary => theGameActor
@@ -90,12 +90,12 @@ class TcpToPy(theGameActor: ActorRef, databaseActor: ActorRef) extends Actor{
     case send: SendJSON =>
       //println("Sending: " + send.message)
       this.theServer.foreach((client: ActorRef) => client ! Write(ByteString(send.message+theDelimiter)))
-      // this.theServer ! Write(ByteString(send.message+theDelimiter))
+    // this.theServer ! Write(ByteString(send.message+theDelimiter))
     // the py server is sent the json message
   }
 
 }
-object TcpToPy {
+object ActualTcpToPy {
 
   def main(args: Array[String]): Unit = {
     setTable()
@@ -105,9 +105,9 @@ object TcpToPy {
     import actorSystem.dispatcher
     import scala.concurrent.duration._
 
-    val theGameActor = actorSystem.actorOf(Props(classOf[gameActor]))
-    val updateDatabase = actorSystem.actorOf(Props(classOf[updateDatabase]))
-    val server = actorSystem.actorOf(Props(classOf[TcpToPy], theGameActor, updateDatabase))
+    val theGameActor = actorSystem.actorOf(Props(classOf[ActualGameActor]))
+    val updateDatabase = actorSystem.actorOf(Props(classOf[ActualUpdateDatabase]))
+    val server = actorSystem.actorOf(Props(classOf[ActualTcpToPy], theGameActor, updateDatabase))
 
 
 

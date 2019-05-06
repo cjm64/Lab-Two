@@ -4,12 +4,12 @@ import play.api.libs.json.{JsValue, Json}
 import java.sql.{Connection, DriverManager, ResultSet}
 
 import akka.actor.{Actor, ActorRef, Props}
-import BackEnd.Methods.Methods._
+import BackEnd.Methods.ActualMethods._
 import theGame._
 
 import scala.collection.mutable
 
-class gameActor extends Actor{
+class ActualGameActor extends Actor{
 
 
   // var newProjectiles: List[Int] = List()

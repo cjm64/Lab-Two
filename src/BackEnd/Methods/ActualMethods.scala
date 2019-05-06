@@ -1,13 +1,13 @@
 package BackEnd.Methods
 
-import BackEnd.scalaClasses.{Player, Projectile, theWorld}
+// import BackEnd.scalaClasses.{Player, Projectile, theWorld}
 
 import play.api.libs.json.{JsValue, Json}
 import java.sql.{Connection, DriverManager, ResultSet}
 import scala.collection.mutable
 
 // projectileMap += id -> List(projX, projY, projUser)
-object Methods {
+object ActualMethods {
 
   var Players: mutable.Map[String, mutable.Map[String, String]] = mutable.Map()
   var Projectiles: List[mutable.Map[String, String]] = List()

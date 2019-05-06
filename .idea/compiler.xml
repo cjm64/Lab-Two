@@ -6,6 +6,7 @@
       <file url="file://$PROJECT_DIR$/src/BackEnd/gameActor.scala" />
       <file url="file://$PROJECT_DIR$/src/BackEnd/Methods/databaseMethods.scala" />
       <file url="file://$PROJECT_DIR$/src/BackEnd/updateDatabase.scala" />
+      <file url="file://$PROJECT_DIR$/src/tests/backendTests.scala" />
     </excludeFromCompile>
     <annotationProcessing>
       <profile name="Maven default annotation processors profile" enabled="true">

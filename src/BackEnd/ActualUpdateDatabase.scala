@@ -3,9 +3,9 @@ package BackEnd
 import play.api.libs.json.{JsValue, Json}
 import java.sql.{Connection, DriverManager, ResultSet}
 import akka.actor.{Actor, ActorRef, Props}
-import BackEnd.Methods.databaseMethods._
+import BackEnd.Methods.ActualDatabaseMethods._
 
-class updateDatabase extends Actor{
+class ActualUpdateDatabase extends Actor{
 
 
   def existsPlayer(name: String): Boolean = {
