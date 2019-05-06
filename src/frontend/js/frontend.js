@@ -188,7 +188,7 @@ function update(time, delta){
     top_kill = 0
     top_player = "you"
     for(var i = 0; i < listofplayers.length; i++){
-        if(listofplayers[i]["Kills"] > top_kill){
+        if(listofplayers[i]["Kills"] > parseFloat(top_kill)){
             top_kill = listofplayers[i]["Kills"]
             top_player = listofplayers[i]["Name"]
         }
