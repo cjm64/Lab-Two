@@ -9,35 +9,32 @@ object Chrissssfun {
     val speed: Double = 50.0 // 50 px / second
     Players(name)("inputX") = horis.toString
     Players(name)("inputY") = vert.toString
-    var time = Players(name)("lastUpdate").toDouble
+    val time = Players(name)("lastUpdate").toLong
     val deltaS = (System.nanoTime() - time) / 1000000000.0
-    Players(name)("x") = ((Players(name)("x").toDouble + Players(name)("inputX").toDouble) * deltaS * speed).toString()
-    Players(name)("y") = ((Players(name)("y").toDouble + Players(name)("inputY").toDouble) * deltaS * speed).toString()
-    Players(name)("lastUpdate") = (System.nanoTime()).toString()
+    Players(name)("x") = (Players(name)("x").toDouble + (Players(name)("inputX").toDouble  * deltaS * speed)).toString
+    Players(name)("y") = (Players(name)("y").toDouble + (Players(name)("inputY").toDouble  * deltaS * speed)).toString
+    Players(name)("lastUpdate") = System.nanoTime().toString
   }
 
   def updateProjectilePos(id: Int): Unit = {
     val speed: Double = 100.0
     for(p <- Projectiles){
       if(p("id").toInt == id){
-        val x = p("x").toDouble
-        val y = p("y").toDouble
         val angle = p("angle").toDouble
         val time = p("lastUpdate").toLong
-        val life = p("lifetime").toDouble
         val deltaS = (System.nanoTime() - time)/1000000000.0
-        p("x") = (p("x").toDouble + math.sin(angle)*speed*deltaS).toString()
-        p("y") = (p("y").toDouble + math.cos(angle)*speed*deltaS).toString()
-        p("lastUpdate") = (System.nanoTime()).toString()
-        p("lifetime") = (p("lifetime").toDouble + deltaS).toString()
+        p("x") = (p("x").toDouble + (math.sin(angle)*speed*deltaS)).toString
+        p("y") = (p("y").toDouble + (math.cos(angle)*speed*deltaS)).toString
+        p("lastUpdate") = System.nanoTime().toString
+        p("lifetime") = (p("lifetime").toDouble + deltaS).toString
       }
     }
   }
 
   def collision(name: String, id: Int): Unit = {
     var killer = ""
-    Players(name)("x") = (math.random() * 800).toString()
-    Players(name)("y") = (math.random() * 800).toString()
+    Players(name)("x") = (math.random() * 800).toString
+    Players(name)("y") = (math.random() * 800).toString
     for(p <- Projectiles){
       if (p("id").toInt == id){
         killer = p("user")
