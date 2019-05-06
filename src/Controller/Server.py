@@ -83,12 +83,12 @@ def got_message(jason):
 @socket_server.on('Jason')
 def got_message(jason):
     #print("message")
-    print(jason)
+    #print(jason)
     data = {"action": "regular", "data": json.loads(jason)}
     delimiter = "~"
     model_socket.sendall((json.dumps(data) + delimiter).encode())
 
 
-app_port = 8115
+app_port = 8502
 print("server at localhost:" + str(app_port))
 socket_server.run(app, port=app_port)

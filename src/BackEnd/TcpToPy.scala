@@ -51,6 +51,7 @@ class TcpToPy(theGameActor: ActorRef, databaseActor: ActorRef) extends Actor{
     case PeerClosed =>
       println("Client Disconnected: " + sender())
       this.theServer = this.theServer - sender()
+      theGame.foundTheServer = false
       // this.theServer = _
     case r: Received =>
       // println("Received: " + r.data.utf8String)
@@ -87,7 +88,7 @@ class TcpToPy(theGameActor: ActorRef, databaseActor: ActorRef) extends Actor{
     // case message: updateDictionary => theGameActor
 
     case send: SendJSON =>
-      println("Sending: " + send.message)
+      //println("Sending: " + send.message)
       this.theServer.foreach((client: ActorRef) => client ! Write(ByteString(send.message+theDelimiter)))
       // this.theServer ! Write(ByteString(send.message+theDelimiter))
     // the py server is sent the json message
@@ -110,8 +111,8 @@ object TcpToPy {
 
 
 
-    actorSystem.scheduler.schedule(16.milliseconds, 120.milliseconds, theGameActor, Update)  // Tells gameActor to update itself
-    actorSystem.scheduler.schedule(120.milliseconds, 120.milliseconds, server, giNewJSON) // Tells tcp to send the json
+    actorSystem.scheduler.schedule(16.milliseconds, 32.milliseconds, theGameActor, Update)  // Tells gameActor to update itself
+    actorSystem.scheduler.schedule(32.milliseconds, 32.milliseconds, server, giNewJSON) // Tells tcp to send the json
     actorSystem.scheduler.schedule(0.milliseconds, 6000.milliseconds, updateDatabase, updateTheDatabase)
     // actorSystem.scheduler.schedul
   }

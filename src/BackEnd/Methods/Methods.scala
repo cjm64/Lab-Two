@@ -72,7 +72,7 @@ object Methods {
   // projectileMap += id -> List(projX, projY, projUser)
 
   def updatePlayerPosition(name: String, vert: Int, horis: Int): Unit = {
-    val speed: Double = 50.0 // 50 px / second
+    val speed: Double = 80.0 // 50 px / second
 
     Players(name)("inputX") = horis.toString
     Players(name)("inputY") = vert.toString
@@ -84,7 +84,7 @@ object Methods {
   }
 
   def updateProjectilePos(id: Int): Unit = {
-    val speed: Double = 100.0
+    val speed: Double = 160.0
     for(p <- Projectiles){
       if(p("id").toInt == id){
         val angle = p("angle").toDouble

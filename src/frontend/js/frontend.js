@@ -9,7 +9,7 @@ var initializedObject;
 function isUsed(name){
     if(gameState["PlayerData"] != undefined){
         for(var y = 0; y < gameState["PlayerData"].length; y++){
-            //// console.log("compare: " + gameState[PlayerData"][y]["Name"] + " and "+ name)
+            console.log("compare: " + gameState["PlayerData"][y]["Name"] + " and "+ name)
             if(gameState["PlayerData"][y]["Name"] == name){
                 return true
             }
@@ -33,8 +33,8 @@ function MyButton(){
     var control = document.getElementById('controls');
     var modal = document.getElementById('myModal');
     name = document.getElementById('username').value;
-    // console.log(name)
-    // console.log(gameState)
+    console.log(name)
+    console.log(gameState)
     if(isUsed(name)){
         document.getElementById('choose').innerHTML = name + " is already taken<br />"
     }
@@ -57,7 +57,7 @@ socket.on('message', function (event) {
     // console.log(event);
     message = JSON.parse(event)
     if(message["type"] == "register"){
-        // console.log(message["data"])
+        console.log(message["data"])
     }
     else if(message["type"] == "game"){
         gameState = message["data"]
@@ -132,9 +132,9 @@ function create () {
     Shots = this.physics.add.group({classType: MyShots, runChildUpdate: true });
     //Creates sprite classes for player bullets and bullets.
 
-    for (y = -1; y < 23; y++)
+    for (y = -3; y < 3; y++)
     {
-        for (x = -1; x < 23; x++)
+        for (x = -3; x < 3; x++)
         {
             this.add.image(800 * x, 800 * y, 'Background').setOrigin(0).setAlpha(1);
         }
@@ -195,7 +195,7 @@ function update(time, delta){
         if(listofplayers[i]["Name"] == name){
             player.x = listofplayers[i]["x"]
             player.y = listofplayers[i]["y"]
-            document.getElementById("myscore").value = listofplayers[i]["Kills"]
+            document.getElementById("myscore").innerHTML = listofplayers[i]["Kills"]
             for(var q = 0; q < listofplayers[i]["Projectile"].length; q++){
                 var mb = Shots.get().setActive(true).setVisible(true);
                 mb.x = listofplayers[i]["Projectile"][q]["x"]
@@ -235,7 +235,7 @@ function update(time, delta){
             }
         }
     }
-    document.getElementById("score").value = top_player + ": " + top_kill.toString()
+    document.getElementById("score").innerHTML = top_player + ": " + top_kill.toString()
 
 
     var cursors = this.input.keyboard.addKeys(
@@ -327,13 +327,17 @@ var Shot = new Phaser.Class({
             this.ySpeed = 0;
             this.angle = 0;
             this.age = 0;
+            this.mult = 0;
         },
     shoot: function (int, dest)
     {
         // Initial position is set to the object shooting's position
         this.x = int.x
         this.y = int.y
-        this.angle = Math.atan( (dest.x-(config['width'] / 2)) / (dest.y-(config['height'] / 2)));
+        if(dest.y < 400){
+            this.mult = 3.14159
+        }
+        this.angle = Math.atan( (dest.x-(config['width'] / 2)) / (dest.y-(config['height'] / 2))) + this.mult;
     },
     update: function () {
         this.age += 1
@@ -355,13 +359,17 @@ var MyShots = new Phaser.Class({
             this.ySpeed = 0;
             this.angle = 0;
             this.age = 0;
+            this.mult = 0;
         },
     shoot: function (int, dest)
     {
         // Initial position is set to the object shooting's position
         this.x = int.x
         this.y = int.y
-        this.angle = Math.atan( (dest.x-(config['width'] / 2)) / (dest.y-(config['height'] / 2)));
+        if(dest.y < 400){
+            this.mult = 3.14159
+        }
+        this.angle = Math.atan( (dest.x-(config['width'] / 2)) / (dest.y-(config['height'] / 2))) + this.mult;
     },
     update: function () {
         this.age += 1
