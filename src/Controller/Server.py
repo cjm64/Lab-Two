@@ -8,7 +8,7 @@ from threading import Thread
 eventlet.monkey_patch()
 app = Flask(__name__)
 socket_server = SocketIO(app)
-model_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+"""model_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 model_socket.connect(('localhost', 8000)) #only if main is active
 
 
@@ -25,7 +25,7 @@ def listen_to_model(the_socket):
             socket_server.emit('message', jsonToAll, broadcast=True)
 
 
-Thread(target=listen_to_model, args=(model_socket,)).start()
+Thread(target=listen_to_model, args=(model_socket,)).start()"""
 
 
 @app.route('/')
@@ -49,7 +49,7 @@ sidToUsername = {}
 
 @socket_server.on('register')
 def got_message(username, jason):
-    # print("register "+ username)
+    print("register "+ username)
     usernameToSid[username] = request.sid
     sidToUsername[request.sid] = username
     delimiter = "~"
@@ -57,7 +57,7 @@ def got_message(username, jason):
     registered = {"type": "register", "data": "registered " + username}
     toSender = json.dumps(registered)
     socket_server.emit("message", toSender)
-    model_socket.sendall((json.dumps(data) + delimiter).encode())
+    #model_socket.sendall((json.dumps(data) + delimiter).encode())
 
 
 @socket_server.on('disconnect')
@@ -68,7 +68,7 @@ def got_connection():
         del usernameToSid[username]
         delimiter = "~"
         data = {"username": username, "action": "disconnect"}
-        model_socket.sendall((json.dumps(data) + delimiter).encode())
+        #model_socket.sendall((json.dumps(data) + delimiter).encode())
 
 
 
@@ -86,7 +86,7 @@ def got_message(jason):
     # print(jason)
     data = {"action": "regular", "data": json.loads(jason)}
     delimiter = "~"
-    model_socket.sendall((json.dumps(data) + delimiter).encode())
+    #model_socket.sendall((json.dumps(data) + delimiter).encode())
 
 
 app_port = 8110

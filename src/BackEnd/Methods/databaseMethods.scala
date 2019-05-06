@@ -11,6 +11,8 @@ object databaseMethods {
 
   var connection: Connection = DriverManager.getConnection(url, username, pass)
 
+  var Projectiles: List[Map[String, String]] = List()
+  var Players: Map[String, Map[String, String]] = Map()
 
   var id: Int = 1
 
@@ -237,8 +239,25 @@ object databaseMethods {
     statement.execute()
   }
 
-
   def CheckOutOfBounds(name: String): Unit = {
+    val worldSize: Double = 800.0
+    val result: Map[String, String] = Players(name)
+    val playerX: Double = result("x").toDouble
+    val playerY: Double = result("y").toDouble
+    if(playerX > worldSize){
+      // if player is beyond 800
+      Players(name)("x") = worldSize.toString
+    }else if(playerX < 0.0){
+      Players(name)("x") = 0.0.toString
+    }
+    if(playerY > worldSize){
+      Players(name)("y") = worldSize.toString
+    }else if(playerY < 0.0){
+      Players(name)("y") = 0.0.toString
+    }
+  }
+
+  def CheckOutOfBoundsDatabase(name: String): Unit = {
     val worldSize: Double = 800.0
     val statement = connection.prepareStatement("SELECT * FROM Player WHERE theName=?")
     statement.setString(1, name)
@@ -278,11 +297,27 @@ object databaseMethods {
     statement.setInt(1, id)
     val result: ResultSet = statement.executeQuery()
     result.next()
-    val lastUpdate: Long = result.getLong("lastUpdate")
-    val currentLife: Double = result.getDouble("lifetime")
-    val deltaS: Double = (System.nanoTime() - lastUpdate)/1000000000.0
+    for(i <- Projectiles){
+      if(i("id") == id.toString){
+        val lastUpdate: Long = i("lastUpdate").toLong
+        val currentLife: Double = i("lifetime").toDouble
+        val deltaS: Double = (System.nanoTime() - lastUpdate)/1000000000.0
+        if (currentLife+deltaS > lifeTime){
+          Projectiles = Projectiles.filter(_ != i)
+        }
+      }
+    }
 
-    if (currentLife+deltaS > lifeTime){
+  }
+
+  def checkLifeTimeDatabase(id: Int): Unit = {
+    val lifeTime: Double = 2.0 // seconds
+    val statement = connection.prepareStatement("SELECT * FROM Projectiles WHERE id=?")
+    statement.setInt(1, id)
+    val result: ResultSet = statement.executeQuery()
+    result.next()
+    val currentLife: Long = result.getLong("lastUpdate")
+    if ((System.nanoTime()-currentLife)/1000000000.0 > lifeTime){
       val statementTwo = connection.prepareStatement("DELETE FROM Projectiles WHERE id=?")
       statementTwo.setInt(1, id)
       statement.execute()
@@ -291,6 +326,11 @@ object databaseMethods {
 
 
   def updatePlayerInput(name: String, vert: Int, horiz: Int): Unit = {
+    Players(name)("inputX") = horiz.toString
+    Players(name)("inputY") = vert.toString
+  }
+
+  def updatePlayerInputDatabase(name: String, vert: Int, horiz: Int): Unit = {
     val statement = connection.prepareStatement("UPDATE Player SET inputX=?, inputY=? WHERE theName=?")
     statement.setInt(1, horiz)
     statement.setInt(2, vert)
@@ -300,6 +340,21 @@ object databaseMethods {
 
 
   def getPlayerProjectiles(name: String): List[Map[String, Double]] = {
+    var theList: List[Map[String, Double]] = List()
+    val statement = connection.prepareStatement("SELECT * FROM Projectiles WHERE user=?")
+    for(i <- Projectiles){
+      if(i("user") == name){
+        var thisMap: Map[String, Double] = Map()
+        val x: Double = i("x").toDouble
+        val y: Double = i("y").toDouble
+        thisMap = Map("x"-> x, "y"-> y)
+        theList=theList:+thisMap
+      }
+    }
+    theList
+  }
+
+  def getPlayerProjectilesDatabase(name: String): List[Map[String, Double]] = {
     var theList: List[Map[String, Double]] = List()
     val statement = connection.prepareStatement("SELECT * FROM Projectiles WHERE user=?")
     statement.setString(1, name)
@@ -316,6 +371,30 @@ object databaseMethods {
 
 
   def getAllPlayers(): List[Map[String, String]] = {
+    // fix this to add projectiles and whatnot
+    var theList: List[Map[String, String]] = List()
+    // var theMap: Map[String, String] = Map()
+    for(player <- Players.keys){
+      val name: String = player
+      val x: String = Players(player)("x").toString
+      val y: String = Players(player)("y").toString
+      val kills: String = Players(player)("kills").toString
+      // val deaths: String = result.getInt("deaths").toString
+      // val projectiles: List[Map[String, Double]] = getPlayerProjectiles(name)
+      theList=theList:+Map(
+        "Name" -> name,
+        "x" -> x,
+        "y" -> y,
+        "Kills" -> kills,
+        // "Projectile" -> projectiles
+        // "Deaths" -> deaths
+      )
+    }
+    theList
+  }
+
+
+  def getAllPlayersDatabase(): List[Map[String, String]] = {
     // fix this to add projectiles and whatnot
     var theList: List[Map[String, String]] = List()
     // var theMap: Map[String, String] = Map()
@@ -343,3 +422,5 @@ object databaseMethods {
 
 
 }
+
+
