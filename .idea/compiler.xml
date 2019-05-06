@@ -1,6 +1,12 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="CompilerConfiguration">
+    <excludeFromCompile>
+      <file url="file://$PROJECT_DIR$/src/BackEnd/TcpToPy.scala" />
+      <file url="file://$PROJECT_DIR$/src/BackEnd/gameActor.scala" />
+      <file url="file://$PROJECT_DIR$/src/BackEnd/Methods/databaseMethods.scala" />
+      <file url="file://$PROJECT_DIR$/src/BackEnd/updateDatabase.scala" />
+    </excludeFromCompile>
     <annotationProcessing>
       <profile name="Maven default annotation processors profile" enabled="true">
         <sourceOutputDir name="target/generated-sources/annotations" />
