@@ -13,10 +13,12 @@
         <sourceOutputDir name="target/generated-sources/annotations" />
         <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
         <outputRelativeToContentRoot value="true" />
+        <module name="cse116" />
         <module name="Lab-Two" />
       </profile>
     </annotationProcessing>
     <bytecodeTargetLevel>
+      <module name="cse116" target="1.5" />
       <module name="Lab-Two" target="1.5" />
     </bytecodeTargetLevel>
   </component>
